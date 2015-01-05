@@ -1,0 +1,417 @@
+%=================================================================
+\ifx%
+\wholebook%
+\relax%
+\else
+% --------------------------------------------
+% Lulu:
+	\documentclass[a4paper,10pt,twoside]{book}
+	\usepackage[
+		papersize={6.13in,9.21in},
+		hmargin={.75in,.75in},
+		vmargin={.75in,1in},
+		ignoreheadfoot
+	]{geometry}
+	\input{../common.tex}
+	\setboolean{lulu}{true}
+% --------------------------------------------
+% A4:
+%	\documentclass[a4paper,11pt,twoside]{book}
+%	\input{../common.tex}
+%	\usepackage{a4wide}
+% --------------------------------------------
+    \graphicspath{{figures/} {../figures/}}
+    \begin{document}
+\fi
+%=================================================================
+%\renewcommand{\nnbb}[2]{} % Disable editorial comments
+\sloppy
+%=================================================================
+\chapter{ Distributing our code } 
+\chalabel{distributingCode}
+\label{code:distribution}
+				
+					Ok, i have done my code, and i want it to be installed with \installationTool{}, because is so cool to do not need to do anything but type one line.
+					
+					Distributing your own packages is quite easy. The first thing you need to have is a metacello repository (or compatible), and a ConfigurationOfYOUR-REALM that understands how to load your package, responding to 
+					
+					(ConfigurationOfYOUR-REALM project version: \#WeWillSupplyThisParameter ) load: 'YourPackageName'. 
+					
+					Once you have that done, proceed to the next stage! 
+					
+					\section{Creating a new repository}
+					
+					A repository of code that have packages for PhaROS needs to have a class called directory. This directory will have metadata of the available packages in this repository. 
+					
+					For doing this, the \installationTool{} has a command that will generate code that you can install in your image, customise and commit into your repository.
+					
+					
+					
+					
+					\begin{lstlisting}[language=bash,title={ Repository creation }]
+						pharos@PhaROS:~$ pharos create-repository --help.
+					\end{lstlisting} 
+				
+					\begin{lstlisting}[language=bash,title={ Repository creation }]
+						usage
+							pharos create-repository PACKAGENAME [ OPTIONS ]
+	
+							PACKAGENAME is the name of the project that this directory will represent. By Example PhaROS.
+	
+								--user name of the user for generation by default is 'Generated'
+								--output path to where the script will be dumped. By default is the standar output.
+
+
+					\end{lstlisting} 
+										
+					Well there are not much options to take in care 
+					
+					
+					\paragraph{package name}
+						This name will be the hooked up, You can also put here the name of our your solution. By example we could make a directory for Donatello package it self, but we decided to include it in \fwkName{} directory. In the end, is a repository. Just try to keep coherence about the fact that is stored in the same repository.
+						This name will be the name of the generated class also, so mind the conventions.
+						
+					\paragraph{user}
+						The output of this command will be generated code, ready to be installed. Like all the code in pharo, it should have a related user. Setup this parameter if you are not happy with the user 'Generated' 
+						
+					\paragraph{output}
+						The output is a file to be installed in an image. You can setup the name of the file where you want the output. Since the default output is the standard output, you can use the operator \verb|\>| of the operative system to redirect it to a file you want. 
+						
+					
+					Let's execute this and see what happen 
+					
+					\begin{lstlisting}[language=bash,title={ Repository creation }]
+						pharos@PhaROS:~$ pharos create-repository example > example.st
+					\end{lstlisting} 
+				
+					\begin{lstlisting}[language=bash,title={ Repository creation  - Error }]
+						example is not a valid name for a package. It must start with uppercase. ThisIsACorrectPackageName 
+					\end{lstlisting} 
+					
+					
+					In pharos, we rely on the conventions of Pharo. This is why, the command had an error. Lets try now with other name
+					
+					\begin{lstlisting}[language=bash,title={ Repository creation }]
+						pharos@PhaROS:~$ pharos create-repository Example > example.st
+					\end{lstlisting} 
+					
+					
+					Now we have a file named example.st in our location
+					
+					Lets open then our image, a browser for this folder and drag and drop the file on the image
+					
+					\begin{figure}[!htbp]
+				  		\centering
+					    		\includegraphics[width=1\textwidth]{RepositoryDragAndDrop.png}		
+							\caption{Installing generated file}
+						\centering
+					\end{figure}
+					
+					
+					And click the 'filein entire file' option
+					
+					\begin{figure}[!htbp]
+				  		\centering
+					    		\includegraphics[width=1\textwidth]{FileInEntireFile.png}		
+							\caption{Installing generated file}
+						\centering
+					\end{figure} 
+					
+					
+					Finally, browse the class side part of the class named ExampleDirectory
+					
+					You will find something like 
+					
+					\begin{figure}[!htbp]
+				  		\centering
+					    		\includegraphics[width=1\textwidth]{ExampleDirectory.png}		
+							\caption{Installing generated file}
+						\centering
+					\end{figure} 
+					
+					
+					\section {Defining packages}
+					
+						Well, we have then our ExampleDirectory.  This class have several class methods. But there are almost examples or auxiliary methods we don't need to watch. (Even when they are all quite obvious)
+						
+						We can see the categories: archetypes, packages, and until. 
+						
+						In archetypes and packages we have methods that define both, archetypes and packages. 
+						
+						So, if we want to have archetypes for creating nodes, we need to set them up, if we want just to register our own PhaROS packages, we just need to set up a new package method. 
+						
+						Lets analyse both, that are quite similar.
+						
+						
+						\begin{code}
+exampleMetacelloPackage
+	^ { 
+			#name -> 'example' .
+			#description -> 'Example package' . 
+			#license ->  'MIT'  .
+			#version -> '0.1.0' .
+			#maintainer -> ({ 
+				#name-> 'Generated' . 
+				#email -> 'Generated@mail.com' 
+			}  asDictionary) .
+			#author -> ({  
+				#name-> 'Generated' . 
+				#email -> 'Generated@mail.com'  
+			} asDictionary) .
+			#metacello -> ({ 
+				#url -> 'http://smalltalkhub.com/mc/Generated/Example/main' . 
+				#configurationOf -> 'ConfigurationOfExample' . 
+				#package -> 'Example'  
+			} asDictionary)
+		 } asDictionary 
+	
+						\end{code}
+						This is a metacello based package. We will just learn to use this flavour, because is the only really needed. 
+						
+						If you check the only thing we need to do is to change the things generated for things related with our package. 
+						
+						Name, description, license, version, maintainer, author, are all information required by ROS for making up the package installation.
+						Then we have the metacello configuration.  Here we need to setup the url of the repository, the name of the ConfigurationOf we made for our repository, and finally, the name that we will use to get the package code. 
+						
+						If your repository needs credentials even to download the code, add the following to the metacello definition: 
+						
+						
+		\begin{code}
+		#metacello -> ({ 
+				#url -> 'http://smalltalkhub.com/mc/Generated/Example/main' . 
+				#configurationOf -> 'ConfigurationOfExample' . 
+				#package -> 'Example'  . 
+				#needCredentials -> true
+			} asDictionary)
+		\end{code}
+						
+						This flag will make the installation tool to prompt the user for a user/password during the installation
+						
+						BEWARE! 
+						
+						You cannot have more than one subclass of PhaROSPackage. This will be the one hooked for installation. 
+						
+						
+						
+						
+						
+						
+						
+						Then, for archetypes the configuration is almost the same, it just change the fact that there is not name attribute, but archetype. 
+						
+						
+					\begin{code}
+archetypeExample
+	^ { 
+			#archetype -> 'Example-archetype' .
+			#description -> 'description' . 
+			#license ->  'MIT'  .
+			#version -> '0.1.0' .
+			#maintainer -> ({ 
+				#name-> 'arechetype-default-user' . 
+				#email -> 'arechetype-default-user@email.com' 
+			}  asDictionary) .
+			#author -> ({  
+				#name-> 'arechetype-default-user' . 
+				#email -> 'arechetype-default-user@email.com'  
+			} asDictionary) .
+			#metacello -> ({ 
+				#url -> 'http://smalltalkhub.com/mc/Generated/Example/main' . 
+				#configurationOf -> 'ConfigurationOfExample' . 
+				#package -> 'Example-archetype'  
+			} asDictionary)
+		 } asDictionary 
+	
+					
+					\end{code}
+					
+					
+					The expected thing to fetch from the metacello repository are the dependencies needed by this kind of package. 
+					
+					We do not have yet hooks for asking the archetype definition or the configuration of to generate any kind of code. 
+					
+					
+					Just as with the packages, if your repository needs credentials even to download the code, add the following to the metacello definition: 
+					
+					
+					
+		\begin{code}
+		#metacello -> ({ 
+				#url -> 'http://smalltalkhub.com/mc/Generated/Example/main' . 
+				#configurationOf -> 'ConfigurationOfExample' . 
+				#package -> 'Example-archetype'  .
+				#needCredentials -> true
+			} asDictionary)
+		\end{code}
+						
+						This flag will make the installation tool to prompt the user for a user/password during the creation
+					
+					
+					
+					
+					
+					After define your package and archetypes methods, we need to modify a method in the util category of our directory class. 
+					
+					
+				\begin{code}
+deployUnitsMetadata
+
+	^ { 
+	
+		self exampleMetacelloPackage.
+		self exampleMonticelloPackage.
+		self archetypeExample.
+	
+	 }
+				\end{code}
+					
+					This method will be called by the installation tool to fetch all the packages and archetypes. So, modify how the array is construct by your own package and archetype methods.
+					
+					
+					Once this is set up, you just need to commit it in to your repository. 
+					
+					\section {Registering repositories}
+					
+					Ok, now that we have our repository set up we need to make the tool to know about this endpoint. 
+					
+					For doing this we have a proper command. 
+					
+					
+					\begin{lstlisting}[language=bash,title={ Repository registration }]
+						pharos@PhaROS:~$  pharos register-repository --help
+					\end{lstlisting} 
+				
+					\begin{lstlisting}[language=bash,title={ Repository creation }]
+					usage: pharos register-repository --url=anUrl --package=aPackage [ OPTIONS ]
+						Options: 
+
+					          --url		[ MANDATORY ] url of a monticello repository
+					          --package	[ MANDATORY ] monticello package name.
+					          --directory	Name of the class that works as directory This class must implement  
+				                               - #includesPackage: 
+				                               - #deployUnitForPackage: 
+				                              Default value - the value given for package. 
+					          --user	Username for the monticello repository
+				                              Default value - empty
+					          --password	Password for the monticello repository
+			                              Default value - empty
+	
+	
+					 The directory class needs to implement
+
+					- #includesPackage: aPackageName
+						this method receive a name of package and return a boolean indicating if package is included by this directory 
+	
+					- #deployUnitForPackage: aPackageName
+						this methods receive a name of package and return a kind of MDPharoDeployUnit. 
+
+					For more information checkout the package PhaROSDeploymentDirectory from the squeaksource repository located at:
+						http://car.mines-douai.fr/squeaksource/PhaROS
+
+					\end{lstlisting} 
+									
+					
+					
+					The options 
+					
+					\paragraph{url} of the repository. In this repository i should be able to locate the named package where the directory is located.
+					\paragraph{package} where the directory is located. Usually the name of the package is the same as the directory.
+					\paragraph{directory} this is the directory class that we just generate and modified before.  As it is indicate in the help, the important fact of the directory is to be polimorfic with the classical directory class. If you need an special implementation instead of the generated one, just mind the cited methods.
+					
+					\paragraph{user/password} If there is need of user / password for accessing the directory class, you need to give them here. 
+					but, take in care that your password will be stored in a plain text file. 
+					
+					
+					
+					If the Directorty cannot be resolved (because the directory does not exist, or the url is wrong) 
+					
+					\begin{lstlisting}[language=bash,title={ Repository registration }]
+						pharos@PhaROS:~$  pharos register-repository --url=http://fake.url.com --package=Directory
+					\end{lstlisting} 
+					
+					You will have this error: 
+					
+					\begin{lstlisting}[language=bash,title={ Repository registration }]
+						Error installing repository: Unable to resolve Directory
+					\end{lstlisting} 
+					
+					In this case, check any typo in this or the previous step.
+					
+					
+					For having a successful example, lets try to do it with PureROS project. 
+					
+					\begin{lstlisting}[language=bash,title={ Repository registration }]
+					pharos@PhaROS:~$  pharos register-repository --url=http://car.mines-douai.fr/squeaksource/Pure --package=PureROSDirectory
+					\end{lstlisting} 
+					\begin{lstlisting}[language=bash,title={ Repository registration }]
+						repository installed correctly. 
+					\end{lstlisting} 
+ 
+
+					Finally, once you have this lecture. You should be able to install and create packages with your own archetypes and package definition :).
+				
+					
+					\section {Brief}
+					
+					
+						From the console 
+				
+						\begin{itemize}
+							\item pharos create-repository YourPackageName > example.st
+								\newline\-\- execute this in the console for generating a directory
+							\item pharos register-repository --url=http://fake.url.com --package=Directory
+								\newline\-\- execute this in the console for registering an existing repository. Yours of from anyone.
+						\end{itemize}
+				
+						From the image 
+						
+						\begin{itemize}
+							\item Define archetypes and packages metadata for allowing your users to be agile
+							\item Define \#needCredentials -> true in your metacello definitions of the metadata to ask for user/password during installation.
+						\end{itemize}
+				
+				
+						Conceptual part
+						
+						\begin{itemize}
+							\item Set up your repository.
+							\item Use \installationTool{} for support your development.
+							\item Distribute your nodes quoting the line to register your repository, packages and archetypes available.  
+						\end{itemize}
+						
+						
+						
+						
+				
+			%	\chapter { Process topology testing }
+			%		-should implement
+
+			%	\part{ Because examples are not just for kids }
+				
+				
+			%	\chapter{ Packages available I - Stargazer }
+			%	\chapter{ Packages available II - Caire }	
+				
+			%	\chapter{ Nodelets available I - Transformation }
+			%	\chapter{ Nodelets available II - Localizer }
+			%	\chapter{ Nodelets available III - SpatialEvents }
+			%	\chapter{ Nodelets available IV - Merger }
+			%	\chapter{ Nodelets available V - ChunkMap }
+			%	\chapter{ Nodelets available VI - MoveBase }
+			%	\chapter{ Nodelets available VII - Metanodelet }
+			%	-should implement
+						
+						
+						
+
+%\chapterauthor{\authorjankurs{} \\ \authorguillaume{} \\ \authorlukas{}}
+
+
+%=============================================================
+\ifx\wholebook\relax\else
+
+
+\end{document}
+
+\fi
+%=============================================================

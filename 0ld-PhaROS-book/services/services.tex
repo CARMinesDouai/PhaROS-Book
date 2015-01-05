@@ -1,0 +1,1000 @@
+%=============================================================
+\ifx%
+\wholebook%
+\relax%
+\else
+% --------------------------------------------
+% Lulu:
+	\documentclass[a4paper,10pt,twoside]{book}
+	\usepackage[
+		papersize={6.13in,9.21in},
+		hmargin={.75in,.75in},
+		vmargin={.75in,1in},
+		ignoreheadfoot
+	]{geometry}
+	\input{../common.tex}
+	\setboolean{lulu}{true}
+% --------------------------------------------
+% A4:
+%	\documentclass[a4paper,11pt,twoside]{book}
+%	\input{../common.tex}
+%	\usepackage{a4wide}
+% --------------------------------------------
+    \graphicspath{{figures/} {../figures/}}
+    \begin{document}
+\fi
+%=================================================================
+%\renewcommand{\nnbb}[2]{} % Disable editorial comments
+\sloppy
+%=================================================================
+\chapter{ Services: call and be called}
+\chalabel{services}
+			
+		\section{Installing our second example with \installationTool{}} \label{donatello:installing}
+			
+			 
+			For the next set of tools to use we will use a new example. Also installable. 
+			
+			\begin{lstlisting}[language=bash,title={Installing donatello}]
+				pharos@PhaROS:~$ pharos install donatello --location={path-to-workspace}
+			\end{lstlisting}
+		
+			
+			
+			Since is a bit more complex than the previous one, the output of the installation will be a bit more complex as well.
+			
+			\begin{lstlisting}[language=bash,title={Installing donatello - Output}]
+				--2014-02-14 15:36:56--  http://get.pharo.org/vm
+				Connecting to 10.1.1.3:8080... connected.
+				Proxy request sent, awaiting response... 200 OK
+				Length: 5285 (5.2K) [text/html]
+				Saving to: `STDOUT'
+
+				100%[============================>] 5,285       --.-K/s   in 0.005s  
+
+				2014-02-14 15:36:56 (1021 KB/s) - written to stdout [5285/5285]
+
+				Downloading the latest pharoVM:
+					http://files.pharo.org/vm/pharo/linux/stable.zip
+				mkdir: cannot create directory `pharo-vm': File exists
+				--2014-02-14 15:36:59--  http://get.pharo.org/20
+				Connecting to 10.1.1.3:8080... connected.
+				Proxy request sent, awaiting response... 200 OK
+				Length: 2587 (2.5K) [text/html]
+				Saving to: `STDOUT'
+
+				Downloading the latest 20 Image:               ] 0           --.-K/s              
+				100%[============================>] 2,587       --.-K/s   in 0.003s  
+
+				2014-02-14 15:36:59 (814 KB/s) - written to stdout [2587/2587]
+
+				    http://files.pharo.org/image/20/latest.zip
+				Pharo.image
+				Setting up variables, network and obtaining required code....
+				Running pre process...  
+				Installing package... 
+				Running post process... 
+				Base path: /home/pharos/ros/workspace
+				Source space: /home/pharos/ros/workspace/src
+				Build space: /home/pharos/ros/workspace/build
+				Devel space: /home/pharos/ros/workspace/devel
+				Install space: /home/pharos/ros/workspace/install
+				####
+				#### Running command: "make cmake_check_build_system" in "/home/pharos/ros/workspace/build"
+				####
+				-- Using CATKIN_DEVEL_PREFIX: /home/pharos/ros/workspace/devel
+				-- Using CMAKE_PREFIX_PATH: /home/pharos/ros/workspace/devel;/opt/ros/groovy
+				-- This workspace overlays: /home/pharos/ros/workspace/devel;/opt/ros/groovy
+				-- Using Debian Python package layout
+				-- Using CATKIN_ENABLE_TESTING: ON
+				-- Call enable_testing()
+				-- Using CATKIN_TEST_RESULTS_DIR: /home/pharos/ros/workspace/build/test_results
+				-- Found gtest sources under '/usr/src/gtest': gtests will be built
+				-- catkin 0.5.77
+				Unloading installation code ... 
+				-- BUILD_SHARED_LIBS is on
+				-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+				-- ~~  traversing 1 packages in topological order:
+				-- ~~  - donatello
+				-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+				-- +++ processing catkin package: 'donatello'
+				-- ==> add_subdirectory(donatello)
+				-- donatello: 0 messages, 1 services
+				-- Configuring done
+				-- Generating done
+				-- Build files have been written to: /home/pharos/ros/workspace/build
+				####
+				#### Running command: "make -j1 -l1" in "/home/pharos/ros/workspace/build"
+				####
+				[ 25%] Generating Python code from SRV donatello/Switch
+				[ 50%] Generating Python srv --init--.py for donatello
+				[ 50%] Built target donatello_generate_messages_py
+				[ 75%] Generating C++ code from donatello/Switch.srv
+				[ 75%] Built target donatello_generate_messages_cpp
+				[100%] Generating Lisp code from donatello/Switch.srv
+				[100%] Built target donatello_generate_messages_lisp
+				[100%] Built target donatello_generate_messages
+
+			\end{lstlisting}
+		
+			
+		\section{Executing Donatello} 
+
+
+			Donatello is a package with some uses for the well known ROS example of the turtle. 
+			It implements different algorithms for managing automatically a turtle, and allow us to change that algorithm for each managed turtle. 
+			
+			Since this example is quite complex, we will use it and analyse code alternatively several times. Each one of the implemented algorithms will serve us as entry point for a new knowledge. 
+			
+			
+			Lets start then. 
+			In order to have the minimum code running for the example you need to run in different consoles each of the next lines: 
+			
+			
+			\begin{lstlisting}[language=bash,title={Starting up ROS}]
+				pharos@PhaROS:~$ roscore
+			\end{lstlisting}
+			
+			With the same output as before:
+			
+			\begin{lstlisting}[language=bash,title={Starting up ROS - Output}]
+				
+				... logging to /home/pharos/.ros/log/a3e8bd7e-8ea0-11e3-bfbd-0800275a8d1d/roslaunch-PhaROS-12822.log
+				Checking log directory for disk usage. This may take awhile.
+				Press Ctrl-C to interrupt
+				Done checking log file disk usage. Usage is <1GB.
+
+				started roslaunch server http://localhost:39207/
+				ros_comm version 1.9.47
+
+
+				SUMMARY
+				========
+
+				PARAMETERS
+				 * /rosdistro
+				 * /rosversion
+
+				NODES
+
+				auto-starting new master
+				process[master]: started with pid [12836]
+				ROS_MASTER_URI=http://localhost:11311/
+
+				setting /run_id to a3e8bd7e-8ea0-11e3-bfbd-0800275a8d1d
+				process[rosout-1]: started with pid [12849]
+				started core service [/rosout]
+			\end{lstlisting}
+			
+			
+			
+			\begin{lstlisting}[language=bash,title={Starting up TurtleSIM}]
+				pharos@PhaROS:~$ rosrun turtlesim turtlesim_node
+			\end{lstlisting}
+			
+			
+				The TurtleSIM is a node that let us spawn turtles, as manageable agents that have both sensors and actuators on board. 
+				Each simulated turtle is related with an exclusive set of topics for managing movement and knowing information about the turtle (we will see better this when we analyse the code). 
+				
+				As output of the TurtleSIM startup we have the information of the turtle that is spawned by default.
+			
+			\begin{lstlisting}[language=bash,title={Starting up TurtleSIM - Output}]
+[ INFO] [1392390503.860630887]: Starting turtlesim with node name /turtlesim
+[ INFO] [1392390503.865011573]: Spawning turtle [turtle1] at x=[5.544445], y=[5.544445], theta=[0.000000]
+			\end{lstlisting}
+			
+				This run command, also will spawn immediately one screen like the following one. 
+			
+			\begin{figure}[!htbp]
+  		
+  				\centering
+    				\includegraphics[width=0.5\textwidth]{TurtleSIM.png}
+				
+				\centering
+				\title{TurtleSIM Screen}
+			\end{figure}
+			
+				This is the simulator. On this screen is where we will see the effect of each control algorithm.
+				
+				
+			
+				Having the TurtleSIM running, now we just need to have the controller node from Donatello package running. 
+				
+			
+			\begin{lstlisting}[language=bash,title={Starting up Donatello/AlgorithmSwitcher}]
+				pharos@PhaROS:~$ rosrun donatello headless algorithm_switcher
+			\end{lstlisting}
+			
+			\begin{lstlisting}[language=bash,title={Starting up Donatello/AlgorithmSwitcher - Output }]
+				Starting up default turtle(turtle1) handler... 
+				Starting up switch service... 
+				Done.
+			\end{lstlisting}
+			
+		
+		
+			
+			Taking advantage of one of the several debugging tools from ROS, we will see the node graph just to understand the current processing layout.
+			
+			
+			\begin{lstlisting}[language=bash,title={Analysing graph topology}]
+				pharos@PhaROS:~$ rqt_graph
+			\end{lstlisting}
+			
+			\begin{figure}[!htbp]
+  				\centering
+    				\includegraphics[width=1\textwidth]{TurtleSIMGraph1.png}
+				\centering
+				
+				\caption{TurtleSIM - AlgorithmSwitcher Graph \label{img:TurtleSIMGraph1} }
+			\end{figure}
+
+
+			The AlgorithmSwitcher node is the one called \_Pharo\_Handle\_1392394756, since we did not specified a node name, this one is generated. (We will learn how to do this later)
+			
+			
+			We can see, then, that we have two nodes (processes). The one that represents a turtle expose sensor information (colour and pose), and consume commands of velocity. The other one, that controls, read the information from the sensors and give directives.
+			
+			
+			But well, if we go back to the TurtleSIM screen, we will realise that there is not change. What means that there is no really a flow of movement directives. 
+			
+			In order to do this, AlgorithmSwitcher ask us for set an algorithm that manage this directives. In order to achieve this, we will need to execute a new command. A command that sends a petition of change to the AlgorithmSwitcher.
+			This command will prompt us for a turtle name and an algorithm name.
+			
+			
+			
+			\begin{lstlisting}[language=bash,title={Starting up Donatello/SwitchRequest}]
+				pharos@PhaROS:~$ rosrun donatello headless switch_request
+			\end{lstlisting}
+			
+			\begin{lstlisting}[language=bash,title={Starting up Donatello/SwitchRequest - Interactive Output }]
+				Please, write the name of turtle you want to switch the algorithm. (The default one is called turtle1) 
+				turtle1
+
+				Please, write the name of one of the following algorithms  #('random' 'quiet' 'pursuiter' 'circular' 'pharo')
+				random
+				
+				Done.
+			\end{lstlisting}
+			
+			
+			As we have been informed before, the turtle that is spawned by default is named turtle1. As response for the first prompting the command asked for, we wrote down \textbf{turtle1}. Then, as algorithm we choose \textbf{random}
+			
+			As we can think, and actually see in the TurtleSIM screen, random means a random behaviour. And that is what we have. 
+			
+			
+			\begin{figure}[!htbp]
+  				\centering
+    				\includegraphics[width=0.5\textwidth]{RandomTurtleSIM.png}
+				\centering
+				
+				\title{ Random TurtleSIM }
+			\end{figure}
+
+			
+			
+			If we repeat the command with the same turtle and a different algorithm name 
+
+			\begin{lstlisting}[language=bash,title={Starting up Donatello/SwitchRequest}]
+				pharos@PhaROS:~$ rosrun donatello headless switch_request
+			\end{lstlisting}
+			
+			\begin{lstlisting}[language=bash,title={Starting up Donatello/SwitchRequest - Interactive Output }]
+				Please, write the name of turtle you want to switch the algorithm. (The default one is called turtle1) 
+				turtle1
+
+				Please, write the name of one of the following algorithms  #('random' 'quiet' 'pursuiter' 'circular' 'pharo')
+				circular
+				
+				Done.
+			\end{lstlisting}
+
+			We will see how the turtle change completely the current behaviour for a new one. 
+			
+			
+			So, the behaviours of the Turtle simulator are dynamic. They can change as our wishes.
+			
+			
+			
+			How does it happens? Why the execution of a bizarre command make so big changes in a node? This doubts have their answers, all in the code.
+			
+			\section{Inspecting Donatello nodes}
+			
+			\subsection{Inspecting AlgorithmSwitcher }
+			
+			 So, let's browse it! 
+			
+			\begin{lstlisting}[language=bash,title={ Editing }]
+				pharos@PhaROS:~$ rosrun donatello edit
+			\end{lstlisting}
+			
+			Once in the Pharo IDE, as show \autoref{img:spotlight}, press control+enter for accessing spotlight. Type DonatelloPackage and enter. 
+			
+			As in the Chatter package, we will go before any other place to the script category. 
+			
+			\begin{figure}[!htbp]
+  				\centering
+    				\includegraphics[width=1\textwidth]{DonatelloPackage.png}
+				\centering
+				
+				\title{ Donatello package }
+			\end{figure}
+
+			
+			We can see here as scripts two node definitions. \#scriptAlgorithmSwitcher and \#scriptSwitchRequest. Let analyse first the what does \#scriptAlgorithmSwitcher:
+			
+			
+			
+			\begin{code}
+
+DonatelloPackage>>#scriptAlgorithmSwitcher
+
+	self log: 'Starting up default turtle(turtle1) handler... '.
+	self registerDefaultHandler.
+	self log: 'Starting up switch service... '.
+	self controller node serve: [ :req :rsp | 
+		self log: ('{1} will behave as {2}' format: {req turtleID . req command} ).
+		(self getOrCreateHandleFor: req turtleID)  algorithm: (DonatelloAlgorithms new algorithmFor: req command).		
+	] at: '/donatello/switch' typedAs:'donatello/Switch'.
+	self log: 'Done.'.
+
+			\end{code}
+			
+			
+			Ok, it looks like there are some new concepts here. We were up-to-date with publishing and subscribing topics, but,  this is not a topic, or is a really weird way to write them (breath quietly and relaxed, this is not a topic). This is how we write a service in  \fwkName{}.
+			
+			\paragraph{Services. \newline} 
+					
+			This code is quite more complex than what it appear to be. (If we remember the graph of the  \autoref{img:TurtleSIMGraph1}, we should remember that there are a lot of connections that are not shown in this piece of code). 
+			So let's clean up of logs ...
+			
+			\begin{code}
+
+DonatelloPackage>>#scriptAlgorithmSwitcher
+
+	self registerDefaultHandler.
+	self controller node serve: [ :req :rsp | 
+		(self getOrCreateHandleFor: req turtleID)  algorithm: (DonatelloAlgorithms new algorithmFor: req command).		
+	] at: '/donatello/switch' typedAs:'donatello/Switch'.
+
+			\end{code}	
+			
+			...and breakdown this code in pieces.  (There is a design view of this package in the first appendix \autoref{appendix:donatello}). 
+			
+			\begin{code}
+
+scriptAlgorithmSwitcher
+
+	self registerDefaultHandler.
+	
+			\end{code}	
+			
+			This first line registers a handler object for the default Turtle (named turtle1). Since is a turtle spawned by default, the cycle for having it working, is different. Then, in order to have it working, it needs a particular way to be configured.
+			
+			\begin{code}
+	self controller node serve: [ :req :rsp | 
+		(self getOrCreateHandleFor: req turtleID)  algorithm: (DonatelloAlgorithms new algorithmFor: req command).		
+	] at: '/donatello/switch' typedAs:'donatello/Switch'.
+
+			\end{code}	
+			
+			This part is more complex, so i will split it in a snippet of service definition, and in the inner code. 
+			
+			\begin{code}
+	self controller node serve: [ :request :response | response data: self do something with: request ] at: '/service/name' typedAs:'service/Type'.
+
+			\end{code}	
+			
+			In order to set up a service we need to give a block that will act as a callback, and it will receive two parameters: request and response. 
+			This callback is responsible for filling up the content of the response object, and it should rely on the request information. 
+			
+			In order to understand better, we need to browse a service type. A  service type has two parts in it definition: the request and the response.
+			Let's analyse our donatello/Switch type, to understand what is happening here. 
+			
+			
+			\begin{lstlisting}[language=bash,title={ Browsing service types }]
+				pharos@PhaROS:~$ rossrv show donatello/Switch
+			\end{lstlisting}
+			
+			
+			 \begin{lstlisting}[language=bash,title={ donatello/Switch definition }]
+				string random='random'
+				string quiet='quiet'
+				string pharo='pharo'
+				string pursuiter='pursuiter'
+				string circular='circular'
+				string command
+				string turtleID
+				---
+				# empty
+			\end{lstlisting}
+			
+
+			The first part of the listing (until the - - - splitter), is the definition of the request type. Is an object that has two fields and several constants for making easy to choose the command value from code. 
+			Before that is extended the response type. In this example, as we can see, there is no response definition. What means that the response is not important, and that the service will give not feedback.
+			
+			So, lets go again to the code we were analysing
+			
+			
+			\begin{code}
+	self controller node serve: [ :req :rsp | 
+		(self getOrCreateHandleFor: req turtleID)  algorithm: (DonatelloAlgorithms new algorithmFor: req command).		
+	] at: '/donatello/switch' typedAs:'donatello/Switch'.
+
+			\end{code}	
+			
+			Now we know that the request object has the following information \#turtleID and \#command. We know also that there is not information needed by the response. 
+			
+			So, we can rewrite, in terms of making easy the example like 
+			
+			\begin{code}
+setTo: aTurtleID anAlgorithm: anAlgorithmName
+	(self getOrCreateHandleFor: turtleID)  algorithm: (DonatelloAlgorithms new algorithmFor: anAlgorithmName).		
+	
+			\end{code}	
+			
+			Quite easy. It get the related handler for a given turtle name (or create it if needed). Then, it choose an algorithm by name and set it to the handle. 
+			
+			Ok, until here is a very simple method, and that is the reason why we can make our self several questions about the domain like
+			
+			\begin{itemize}	
+				\item What is a handle? 
+				\item Why when i create one handle it appears a new turtle in the screen?
+				\item What is an 'algorithm'? Why it can be set up? 
+			\end{itemize}
+			
+			And also some nasty questions about the lifetime of a package, like
+			\begin{itemize}	
+				\item The Switch type belongs to our package?
+				\item How do i define a type?
+			\end{itemize}
+			
+			
+			
+			In order to close the example domain first, we will browse the involved methods
+			
+
+			\begin{code}
+DonatelloPackage>>#registerDefaultHandler
+	turtles at: 'turtle1' put: self nodelets turtlesim defaultTurtleHandler.
+			\end{code}
+
+			Ok, against what we supposed, this code does not solve many doubts, but generate others instead. In this line we access a local dictionary of 'turtles' (handles) and set as 'turtle1' (the name of the default turtle) the return value of 
+			
+			\begin{code}
+self nodelets turtlesim defaultTurtleHandler. 
+			\end{code}
+			
+			What the hell does it means? 
+			
+			\paragraph{First approach to the Nodelets\newline\newline} 
+			
+			We will say that a nodelet is a piece of code that is reusable, (not like a package and a script/node, which are quite coupled with the behaviour we want to implement). 
+			A Nodelet is an instance of a subclass of the PhaROSNodelet class. 
+			
+			A Nodelet has a defined lifecycle and it can be injected into a Nodelet container inside our default controller. 
+			
+			
+			If we browse the \#buildController method in our DonatelloPackage we will find
+			
+			\begin{code}
+DonatelloPackage>>#buildController
+	^ self nodeletInjectionExample: super buildController.
+	
+DonatelloPackage>>#nodeletInjectionExample: aController
+	aController nodelets use: TurtlesimNodelet as:#turtlesim.
+	aController nodelets turtlesim isKindOf: TurtlesimNodelet.
+	^ aController.		
+			\end{code}
+			
+			The \#nodeletInjectionExample: method is a method that set up a configuration for our package. In our example, the only requirement is the TurtlesimNodelet. And we define it to be accessible under the name of \#turtlesim. 
+			
+			So, after this, we know that  
+			
+			\begin{code}
+				aController nodelets turtlesim 
+			\end{code} 
+			
+			will give us something related with TurtlesimNodelet class. For now, in order to not go into deep implementation details, i ask you to believe me, that the response is an instance of TurtlesimNodelet, also that this instance is always the same, and that it is stored in the nodelet container. 
+			
+			
+			Finally i ask you also to believe that inside a package
+			
+			\begin{code} 
+				aController nodelets 
+			\end{code} 
+			
+			will give us a nodelet container. 
+			
+			
+			\paragraph{Going back to} the code analysis, now we know where go to find the meaning of 
+			
+			\begin{code}
+self nodelets turtlesim defaultTurtleHandler. 
+			\end{code}
+			
+			We need to browse  \#defaultTurtleHandler in the class TurtlesimNodelet.
+
+			\begin{code}
+TurtlesimNodelet>>#defaultTurtleHandler
+	^ self turtleHandleFor: 'turtle1'.
+	
+TurtlesimNodelet>>#turtleHandleFor: aTurtleName
+	^ TurtleHandle new initializeWith: aTurtleName and: self; yourself.
+
+			\end{code}
+			
+			
+			Then, here we find some easy code. The default handler method ask for a handler for a turtle named 'turtle1' (that we know already that is the name of the default turtle).
+			And then, a turtle handle is an instance of TurtleHandle, initialised with a name, and a TurtlesimNodelet.
+			
+			Finally we reach what is it. So, lets peek the \#initializeWith:and: at the TurtleHandle class.
+			
+			
+			\begin{code}
+
+TurtleHandle>>#initializeWith: aName and: aTurtlesimNodelet
+	name:= aName.
+	turtlesimNodelet := aTurtlesimNodelet.
+	
+	velocityOut := turtlesimNodelet rosnode topicPublisher: '/', aName, '/command_velocity' typedAs: 'turtlesim/Velocity'.
+	
+	(turtlesimNodelet rosnode buildConnectionFor: '/',aName,'/color_sensor') 
+			typedAs: 'turtlesim/Color'; 
+			for: [ : aColor | self currentColor: aColor ];
+	 		connect.
+			
+	(turtlesimNodelet rosnode buildConnectionFor: '/',aName,'/pose') 
+			typedAs: 'turtlesim/Pose'; 
+			for: [ : aPose | self currentPose: aPose ];
+			connect.
+	
+			\end{code}
+			
+			
+			Even when the code is longer, and at first view it mixes several meanings, we should feel better, because now we are watching something that is already familiar. 
+			
+			Yes, actually this is just configuration of connections with ros. Since we already made a detailed analysis of this kind of code in the Chatter example at section \ref{sssection:chatterinspect}, we will just make a quick understanding.
+			
+				\begin{code}
+
+TurtleHandle>>#initializeWith: aName and: aTurtlesimNodelet
+	name:= aName.
+	turtlesimNodelet := aTurtlesimNodelet.
+	
+	velocityOut := turtlesimNodelet rosnode topicPublisher: '/', aName, '/command_velocity' typedAs: 'turtlesim/Velocity'.
+	
+				\end{code}
+				
+					First it stores references to the name and nodelet. Also register a publisher for /\{turtle-name\}/command-velocity. Typed as turtlesim/Velocity. This publisher will let us print a velocity to the turtle we are handling. 
+					
+					
+				\begin{code}
+	(turtlesimNodelet rosnode buildConnectionFor: '/',aName,'/color_sensor') 
+			typedAs: 'turtlesim/Color'; 
+			for: [ : aColor | self currentColor: aColor ];
+	 		connect.
+				\end{code}
+				
+				
+					Then it subscribes to  /\{turtle-name\}/color-sensor, with a setter as callback. This means that our handler have a reference to the last detected colour . 	
+					
+				\begin{code}
+	(turtlesimNodelet rosnode buildConnectionFor: '/',aName,'/pose') 
+			typedAs: 'turtlesim/Pose'; 
+			for: [ : aPose | self currentPose: aPose ];
+			connect.
+	
+				\end{code}
+				
+					Finally,  it subscribes to  /\{turtle-name\}/pose, with an other setter as callback. What again means that our handler have a reference to the last detected pose . 
+		 	
+			
+			So, as we supposed, \#defaultTurtleHandler returns a handle object configured to listen the sensors and control the movements of the default turtle.
+			
+			We can go back to analyse in deep the rest of the Algorithm Switcher script node.
+			
+			 
+			\begin{code}
+
+DonatelloPackage>>#scriptAlgorithmSwitcher
+
+	self registerDefaultHandler.
+	self controller node serve: [ :req :rsp | 
+		(self getOrCreateHandleFor: req turtleID)  algorithm: (DonatelloAlgorithms new algorithmFor: req command).		
+	] at: '/donatello/switch' typedAs:'donatello/Switch'.
+
+			\end{code}	
+			
+			We already understand what happens with \#registerDefaultHandler. We can go now for \#getOrCreateHandleFor:. 
+			
+						
+			\begin{code}
+DonatelloPackage>>#getOrCreateHandleFor: aTurtleID
+	^ turtles at: aTurtleID ifAbsentPut: [ self nodelets turtlesim spawnTurtle: aTurtleID ].
+			\end{code}
+			
+			
+			As well as  \#registerDefaultHandler, it access the handle dictionary. But if there is not a handle, does not ask for a handle but for spawning a turtle. This is because if the turtle is not in the dictionary is because it does not exist, and it needs to be created. 
+			
+			 
+			
+			\begin{code}
+TurtlesimNodelet>>#spawnTurtle: aName 
+	^ self spawnTurtle: aName at: 10@10.	
+	
+	
+TurtlesimNodelet>>#spawnTurtle: aName at: aPoint
+	(self controller node service: '/spawn' ) call: [ : rqst | 
+		rqst x: aPoint x. 
+		rqst y: aPoint y. 
+		rqst name: aName 
+	] .
+	^ self turtleHandleFor: aName.
+
+			\end{code}
+			
+			In order to create new turtles inside the TurtleSim, the Turtle simulator expose a service called /spawn. This service is typed as turtlesim/Spawn .
+			
+			We can use rossrv to check the definition
+			\begin{lstlisting}[language=bash,title={ Browsing service types }]
+				pharos@PhaROS:~$ rossrv show turtlesim/Spawn
+			\end{lstlisting}
+			
+			
+			 \begin{lstlisting}[language=bash,title={turtlesim/Spawn definition }]
+				float32 x
+				float32 y
+				float32 theta
+				string name
+				---
+				string name
+			\end{lstlisting}
+			
+			
+			The spawn serve then takes as request type the initial pose of the turtle to create (x, y, theta) and the name of it. And its response the name of the turtle. 
+			
+			Let's analyse the service call as a snippet. 
+			
+			
+			\begin{code}
+			| response |
+			response := (self controller node service: '/service/name' ) call: [ : request | 
+				"make up the request"
+			] .
+			\end{code}
+			
+			In order to call a service, we need then to ask for the service object, looking up through the built in node. Since the services are supposed to have unique name, we don't really need to check the type for avoiding name collision. So there is not need of specify. A service understands \#call:,method that receives a block for making up a request. The returning of this message is the response of the service request. 
+			
+			
+			Going back to the last code that we were analysing
+			
+			\begin{code}
+TurtlesimNodelet>>#spawnTurtle: aName at: aPoint
+	(self controller node service: '/spawn' ) call: [ : rqst | 
+		rqst x: aPoint x. 
+		rqst y: aPoint y. 
+		rqst name: aName 
+	] .
+	^ self turtleHandleFor: aName.
+			\end{code}
+			
+			We now know that \#spawnTurtle:at, calls /spawn service, and returns a handle for the new turtle.
+			
+			
+			So going back to the script for Algorithm Switcher, we know that \#getOrCreateHandleFor: turtleName, get or create handles for turtles, where create a handle also means to create the new turtle. 
+			
+			
+			In our analysed code 
+			
+			\begin{code}
+				(self getOrCreateHandleFor: req turtleID)  algorithm: (DonatelloAlgorithms new algorithmFor: req command).
+			\end{code}
+			
+			After resolving the handler, we set an algorithm, fetched by name from a DonatelloAlgorithms object. 
+			
+			Let's check then how does it look an algorithm, specially the one we just used: 'random' 
+			
+			
+			\begin{code}
+DonatelloAlgorithms>>#algorithmFor: aCommand
+	
+	^ algorithms at: aCommand asLowercase  ifAbsent: [ 
+		self idleHandler.	
+	 ]
+
+DonatelloAlgorithms>>#initialize
+	algorithms := Dictionary new.
+	
+	algorithms at: 'random' put:self randomHandler.
+	algorithms at: 'quiet' put:self idleHandler.
+	algorithms at: 'circular' put:self circularHandler.
+	algorithms at: 'pharo' put:self pharoHandler.
+	algorithms at: 'pursuiter' put:self pursuiterHandler.
+	
+			\end{code}
+			
+			Since the resolver of an algorithm based it self in a dictionary, i browsed also the initialise method of the same object, and we can find a configuration that put 'names' to different 'algorithms'. 
+			
+			For the random algorithm then we just need to browse \#randomHandler and check what it returns. 
+			
+			
+			\begin{code}
+DonatelloAlgorithms>>#randomHandler
+
+	^ [ : handle |
+		| linear angular random sign|
+		
+		random := (Random seed: DateAndTime now asUnixTime).
+		sign := 1.
+		
+		[ true ] whileTrue: [
+			(random nextInt: 20) even ifTrue: [
+				random := (Random seed: DateAndTime now asUnixTime).
+			] ifFalse: [ 
+				sign := sign * -1.
+			 ].
+			
+			
+			linear := (random next; next; nextInt:20 )+((random nextInt:9)) / 10.
+			angular := (random next;next; next; nextInt:9) + (random  next; next; nextInt:9) / 10.
+			
+			linear := linear * sign. 
+			angular := angular * sign * -1.
+			
+			handle moveAt: linear and: angular. 			
+			( (Random seed: DateAndTime now asUnixTime) next; nextInt: 3) seconds asDelay wait.
+		].
+ 	].
+			\end{code}
+			
+			
+			Well, then we know what is an algorithm now. At least one example of it. Is a block that receives a handler by parameter, and that it defines a behaviour. 
+			
+			I let you the detailed analysis of this code, is quite easy. In general terms it randomise a linear amount of velocity and an angular amount of velocity, it print this velocity in the handle sending \#moveAt:and: and wait a randomised amount of seconds between 1 and 3 for the next iteration.
+			
+			We can see also that all the behavioural code is inside an infinite loop. 		
+			
+			
+			Finally, we need to check what happens when we assign this block to the turtle handle through \#algorithm: message.
+						
+			
+			\begin{code}
+TurtleHandle>>#algorithm: aBlock
+	processHandler ifNotNil:[
+		processHandler finalize.
+	].
+
+	 processHandler := [aBlock cull: self cull: turtlesimNodelet ] shootIt asStickyReference.
+			\end{code}
+			
+			Well, this setter is a bit more complex as a normal one, but some how, it was expected, if we remember that this code is executed by a service call and that the algorithm block has an infinite loop inside.
+			
+			This setter, first check if there is a previous algorithm running, if there is, it finalise it. Then configures a block that executes the given block with two optional parameters, the handle ( as we realise analysing the random algorithm), and the nodelet.  It executes the configured block with a \#shootIt message, that means that it will be executed in a different thread, and that returns a future. Finally,  it sends asStickyReference to that future, what means that if the processHandler variable change it reference by other one (like by example nil, or other future), it will stop the related process. (For more information about this, check the TaskIT reference).
+			
+			
+			
+			Making a quick brief 
+			
+			AlgorithmSwitcher setup a handle for the default turtle, without any algorithm set. Then it setup a service, that receives as request a turtle name and a algorithm name. When this service is called it check if it has a handler, if there i no handler for the cited turtle, it spawn a turtle with that name and creates a handler for it. Whatever if the handle exists or is created, it sets the algorithm that is in the callback. If the algorithm does not exist, it installs a default algorithm. 
+						
+			This means that if we try the example again executing the Switch request command with other turtle name, we should have other turtle in the TurtleSim screen! Lets try it!
+
+			
+			\section{Executing switch request with several turtle names}
+			
+			For trying our new example, we need to startup all the system again. 
+			
+			
+			\begin{lstlisting}[language=bash,title={Starting up ROS}]
+				pharos@PhaROS:~$ roscore
+			\end{lstlisting}
+			
+			With the same output as before:
+			
+			\begin{lstlisting}[language=bash,title={Starting up ROS - Output}]
+				
+				... logging to /home/pharos/.ros/log/a3e8bd7e-8ea0-11e3-bfbd-0800275a8d1d/roslaunch-PhaROS-12822.log
+				Checking log directory for disk usage. This may take awhile.
+				Press Ctrl-C to interrupt
+				Done checking log file disk usage. Usage is <1GB.
+
+				started roslaunch server http://localhost:39207/
+				ros_comm version 1.9.47
+
+
+				SUMMARY
+				========
+
+				PARAMETERS
+				 * /rosdistro
+				 * /rosversion
+
+				NODES
+
+				auto-starting new master
+				process[master]: started with pid [12836]
+				ROS_MASTER_URI=http://localhost:11311/
+
+				setting /run_id to a3e8bd7e-8ea0-11e3-bfbd-0800275a8d1d
+				process[rosout-1]: started with pid [12849]
+				started core service [/rosout]
+			\end{lstlisting}
+			
+			
+			
+			\begin{lstlisting}[language=bash,title={Starting up TurtleSIM}]
+				pharos@PhaROS:~$ rosrun turtlesim turtlesim_node
+			\end{lstlisting}
+			
+				As output of the TurtleSIM startup we have the information of the turtle that is spawned by default.
+			
+			\begin{lstlisting}[language=bash,title={Starting up TurtleSIM - Output}]
+[ INFO] [1392390503.860630887]: Starting turtlesim with node name /turtlesim
+[ INFO] [1392390503.865011573]: Spawning turtle [turtle1] at x=[5.544445], y=[5.544445], theta=[0.000000]
+			\end{lstlisting}
+			
+				This run command, also will spawn immediately one screen like the following one. 
+			
+			\begin{figure}[!htbp]
+  		
+  				\centering
+    				\includegraphics[width=0.5\textwidth]{TurtleSIM.png}
+				
+				\centering
+				\title{TurtleSIM Screen}
+			\end{figure}
+			
+			
+							
+			
+			\begin{lstlisting}[language=bash,title={Starting up Donatello/AlgorithmSwitcher}]
+				pharos@PhaROS:~$ rosrun donatello headless algorithm_switcher
+			\end{lstlisting}
+			
+			\begin{lstlisting}[language=bash,title={Starting up Donatello/AlgorithmSwitcher - Output }]
+				Starting up default turtle(turtle1) handler... 
+				Starting up switch service... 
+				Done.
+			\end{lstlisting}
+			
+
+			
+			So now we will execute a different the same command as in the previous example, but with turtle2 as turtle name. 
+			
+			
+			\begin{lstlisting}[language=bash,title={Starting up Donatello/SwitchRequest}]
+				pharos@PhaROS:~$ rosrun donatello headless switch_request
+			\end{lstlisting}
+			
+			
+			\begin{lstlisting}[language=bash,title={Starting up Donatello/SwitchRequest - Interactive Output }]
+				Please, write the name of turtle you want to switch the algorithm. (The default one is called turtle1) 
+				turtle2
+
+				Please, write the name of one of the following algorithms  #('random' 'quiet' 'pursuiter' 'circular' 'pharo')
+				random
+				
+				Done.
+			\end{lstlisting}
+
+			
+			
+			Let's go to the screen to see what happens.
+			
+			\begin{figure}[!htbp]
+  		
+  				\centering
+    				\includegraphics[width=0.5\textwidth]{TurtleSIM1Quiet1Random.png}
+				
+				\centering
+				\title{TurtleSIM Screen}
+			\end{figure}
+			
+			\newpage
+			
+			
+			
+			Taking in care the code analysis, at this point, the AlgorithmSwitcher node, should have two handles: turtle1 and turtle2. Each of them connected with the respective turtles. 
+			
+			Since handle objects are invisible for ROS, lets check what have to show the rqt-graph command 
+			
+			
+			\begin{lstlisting}[language=bash,title={Analysing graph topology}]
+				pharos@PhaROS:~$ rqt_graph
+			\end{lstlisting}
+
+
+			\begin{figure}[!htbp]
+  				\centering
+    				\includegraphics[width=1\textwidth]{TurtleSIMGraph2.png}
+				\centering
+				
+				\caption{TurtleSIM - AlgorithmSwitcher Graph \label{img:TurtleSIMGraph2} }
+			\end{figure}
+
+			
+			We can see how the turtle1 and the turtle2 are both connected to our node, just as expected.
+			
+			
+			\newpage
+			
+			Now, if we execute again the command and we send and algorithm for the default turtle, we should have the two turtles moving
+			
+			
+			
+			\begin{lstlisting}[language=bash,title={Starting up Donatello/SwitchRequest}]
+				pharos@PhaROS:~$ rosrun donatello headless switch_request
+			\end{lstlisting}
+			
+			\begin{lstlisting}[language=bash,title={Starting up Donatello/SwitchRequest - Interactive Output }]
+				Please, write the name of turtle you want to switch the algorithm. (The default one is called turtle1) 
+				turtle1
+
+				Please, write the name of one of the following algorithms  #('random' 'quiet' 'pursuiter' 'circular' 'pharo')
+				circular
+				
+				Done.
+			\end{lstlisting}
+			
+			
+			Let's go to the screen to see what happens.
+			
+			
+			
+			\begin{figure}[!htbp]
+  		
+  				\centering
+    				\includegraphics[width=0.5\textwidth]{TurtleSIM1Circular1Random.png}
+				
+				\centering
+				\title{TurtleSIM Screen}
+			\end{figure}
+			
+			
+			I leave to you the inspection of the other node  (the one called SwitchRequest), because it has nothing new to care about. So you are able to do it your self. 
+			
+			
+				
+			\section{What we learned}
+			
+				We learned several things with this example. (and we will use it again for other two concepts)
+				
+				
+				\paragraph{From the console \newline}
+				
+				\begin{itemize}
+					\item rossrv show serviceType/Name
+						\newline \-\- It shows the definition of a type related with a service
+				\end{itemize}
+				
+				\paragraph{From a PhaROS package  \newline}
+				
+				\begin{itemize}
+					\item self controller node serve: [ :rqt :rsp \textpipe{} "Executes something with request and fills up the response" ] at: '/service/name' typedAs:'service/Type'.
+						\newline \-\- Register the given block as a service accessible as '/service/name' typed as 'service/Type'
+					\item response := (self controller node service: '/service/name' ) call: [ : request \textpipe{} "make up the request" ] .
+						\newline \-\- Calls the service served at '/service/name' configuring the request with the given block. 
+					\item self nodelets use: Nodelet as: \#name 
+						\newline \-\- Registers a nodelet to be accessed as \#name. (self nodelets name).
+		
+				\end{itemize}
+			
+				\paragraph{Conceptually \newline}
+				
+				\begin{itemize}
+					\item Packages are for group scripts
+					\item Packages define a set of behaviours related by domain.
+					\item Nodelets define reusable pieces of robotic software.
+					\item Is cool to design our own domain abstractions
+				\end {itemize}
+%\chapterauthor{\authorjankurs{} \\ \authorguillaume{} \\ \authorlukas{}}
+
+%=============================================================
+\ifx\wholebook\relax\else
+
+
+\end{document}
+
+\fi
+%=============================================================

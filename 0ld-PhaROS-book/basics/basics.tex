@@ -1,0 +1,171 @@
+%=================================================================
+\ifx%
+\wholebook%
+\relax%
+\else
+% --------------------------------------------
+% Lulu:
+	\documentclass[a4paper,10pt,twoside]{book}
+	\usepackage[
+		papersize={6.13in,9.21in},
+		hmargin={.75in,.75in},
+		vmargin={.75in,1in},
+		ignoreheadfoot
+	]{geometry}
+	\input{../common.tex}
+	\setboolean{lulu}{true}
+% --------------------------------------------
+% A4:
+%	\documentclass[a4paper,11pt,twoside]{book}
+%	\input{../common.tex}
+%	\usepackage{a4wide}
+% --------------------------------------------
+    \graphicspath{{figures/} {../figures/}}
+    \begin{document}
+\fi
+%=================================================================
+%\renewcommand{\nnbb}[2]{} % Disable editorial comments
+\sloppy
+%=================================================================
+\chapter{Basic Concepts}
+\chalabel{basics}
+
+\section{ROS}
+
+	Before we are able to explain benefits from \pharos, we need to inform about what ROS is. 
+	
+	ROS is both, an integration framework for robotics and an architecture for robotics.
+	
+	In terms of architecture, it propose a process layout, in terms of integration, it propose channels and protocols of communication. 
+	 
+	ROS architecture proposal is a graph of processes with connections given by topic of interest. 
+	
+	\subsection{ROS basic concepts}
+	
+	ROS counts with the following concepts:
+	 
+	 \begin{itemize}
+		\item Nodes
+		\item Topics 
+		\item Services
+	 \end{itemize}
+
+	\begin{figure}[!htbp]
+  		\centering
+    		\includegraphics[width=1\textwidth]{graph.png}
+		\caption{A ROS graph example. With circles the nodes and with arrows the topics }
+		\centering
+	\end{figure}
+	
+
+	
+		 \paragraph{Node}
+		 	A node in ROS is a process that is susceptible to connect and be connected with other processes and to contribute to the robotic system. (Giving like that the outline of graph of process).
+			
+			For more technical information about nodes, browse this link \hyperlink{http://wiki.ros.org/Nodes}{http://wiki.ros.org/Nodes}
+			
+		\paragraph{Topic}
+			The connections or relations between Nodes inside ROS architecture are by interest, so, they are called topics. A topic is a channel through is sent a kind of information. Nodes can join to a topic in concept of publishers or in concept of subscribers. All the information given through a topic by all the publisher nodes will arrive to all the subscriber nodes. 
+			One particular property of a topic is that topics are one way communication.
+	
+			For more technical information about topics, browse this link \hyperlink{http://wiki.ros.org/Topics}{http://wiki.ros.org/Topics}
+			
+			
+		\paragraph{Service}
+			Beside the strong relation between Nodes (topics) we have also other way to relate: the Service. A service is a capability offered on demand. It requires a request and it offers a response in response. So topics are bilateral communications. 
+			Usually are related with changes of behaviour of the implementor node, access to information, resources management. 
+	
+		
+			For more technical information about services, browse this link \hyperlink{http://wiki.ros.org/Services}{http://wiki.ros.org/Services}
+	
+	\subsection{Adopting ROS for development}
+	
+		As we told before, ROS has two meanings, integration and architecture. So, to adopt ROS has two main impacts on our development, mainly, in that two branches.
+		
+		\paragraph{Integration lines}
+			
+				When we talk about integration, we talk about making several solutions work together. There is no way to make several persons to work together on something meaningful talking different languages. The same way, in order to make several pieces of human work to cooperate we need to share some standard uses. 
+				The first and easiest part of the standard is the protocol of communication, what includes handshake, discovery and data serialisation.
+				 
+				There is, however, a part less formal, what is about naming and typing communications, which is the hardest use to adopt, because is defined dynamically by the community, so, is a matter of usage. 
+				
+				
+		\paragraph{Architecture lines}
+	
+				In terms of architecture, is highly important to take in care the meaning of process graph. 
+			The graph of process is useful meanwhile is up-to-date. That means that the information should flow as fast as it needs. All the nodes count with that fact. 
+			In order to achieve that goal, nodes should be specific enough, in order to do not overload the process capability with too much Input/Output operations and to do not take too much time for generating the expected output. 
+			
+			This lines usually converge in nodes where the main process/thread runs with a rate (it runs n times per second), synchronising information from different inputs and informing output. 
+			Usually heavy work is available through services. 
+		
+		\paragraph{Benefits}
+		
+			The main and quickly seen benefits is the amount of work already done and available that we can use. From algorithms of localisation to visualisation tools and ready to work simulators. The catalog promise to let your application have at least a prototype in not too much time.
+			
+			The  highly responsive community of ROS is growing up quickly, you can have answers to your problems quick if is not already answered (ROS count with an index of already made questions where anyone is welcome to participate. \hyperlink{http://answers.ros.org/}{http://answers.ros.org/}
+			
+			Your work will be easy to integrate with actual technologies and integrate it again in the future will may be difficult but doable.
+			
+			
+			
+	
+	\section{\pharos}
+
+		\pharos is library and framework that allows you to write ROS nodes in the Pharo Smalltalk language ( \hyperlink{www.pharo.org}{www.pharo.org} ). 
+		
+		\subsection{Aiming}
+		
+		The aiming of \fwkName{} is to exploit the benefits of a highly dynamic image-based language (live environment) for the agile and prototype oriented development of ROS nodes and robotics solutions. Encourage code reusability and testing.  An being also able to program and design in terms of high level abstractions, making possible to \pharos to be used in robotics programming courses, without needing to know much about robotics in first time. 
+		
+		In order to make a goal-meeting analysis i will list this goals in a more concrete way 
+		
+		\begin{itemize}
+			\item Node prototyping
+			\item Code reusability
+			\item Testability
+			\item Solution prototyping 
+			\item High level abstractions
+		\end{itemize}
+		
+		
+		
+		\subsection{Philosophy}
+		
+		
+			Before talk about which abstractions do we have at hand, we want to propose a method of work that has gave us several satisfactions.	 We will make a more formal presentation in forward in the article, but first we introduce this ideas as guidelines of making up of available abstractions.
+			
+						
+			\paragraph{Do not reinvent the wheel}
+				
+				This is a really usual thing in engineering, do not invent something new or worst, something old,  during the engineering process. Check always if there is something already done to solve your problems, or part of them.
+				Several times the need we have can be solved quickly by putting some nodes to work together. Several times it will not be the best idea from performance point of view, but again, you will gain better knowledge of the problem by using already existing solutions, allowing you to know that maybe performance was not critical on that issue or making you to understand where there are bottlenecks related with the problem it self. 
+			
+			\paragraph{Behaviour driven programming - BDP}
+			
+				Even when it has things in common with the well known idea of Behaviour driven development of software engineering, ( 
+				\cite{BDD}), is not actually the same. You will realise quite soon that is not straight forward at all to test a robotic behaviour, and that stand for it goes quickly against prototyping. Then, we will not base our development on expected behaviour and easy to repeat simple behaviour, but in desired robotic behaviour.
+				
+				Then we propose to think about which is the behaviour that you want for your robot for a particular scenario, localise the related sources of information available in ROS and start using this data as soon as possible, to understand quickly the relation in between you desires and the system. Several times you will need to cut behaviours in several smaller behaviours. But is quite important to do not implement more than the strictly needed in terms of stability and robustness. 
+				
+				To focus on the behaviour will allow you to understand which is the expected system before and after your program start to run, allowing you to make some architectural - layout tests.   				
+				
+				
+			\paragraph{Domain driven design}
+				
+				
+				This is an already old and well known idea in software, thats why we will not spend lines explaining it (\cite{DDD}). We attach tightly to this idea when we are developing drivers and behaviours because it is what will make our code more reusable. Despite available abstractions, if we don't make things to make sense in the domain they exists, all the things we implement will be related with the punctual problem we are solving. So do never miss the domain picture of your solution.
+				
+
+
+%\chapterauthor{\authorjankurs{} \\ \authorguillaume{} \\ \authorlukas{}}
+
+
+%=============================================================
+\ifx\wholebook\relax\else
+
+
+\end{document}
+
+\fi
+%=============================================================

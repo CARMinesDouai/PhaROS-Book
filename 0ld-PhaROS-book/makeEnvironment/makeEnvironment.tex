@@ -1,0 +1,373 @@
+
+%=================================================================
+\ifx%
+\wholebook%
+\relax%
+\else
+% --------------------------------------------
+% Lulu:
+	\documentclass[a4paper,10pt,twoside]{book}
+	\usepackage[
+		papersize={6.13in,9.21in},
+		hmargin={.75in,.75in},
+		vmargin={.75in,1in},
+		ignoreheadfoot
+	]{geometry}
+	\input{../common.tex}
+	\setboolean{lulu}{true}
+% --------------------------------------------
+% A4:
+%	\documentclass[a4paper,11pt,twoside]{book}
+%	\input{../common.tex}
+%	\usepackage{a4wide}
+% --------------------------------------------
+    \graphicspath{{figures/} {../figures/}}
+    \begin{document}
+\fi
+%=================================================================
+%\renewcommand{\nnbb}[2]{} % Disable editorial comments
+\sloppy
+%=================================================================
+\chapter{Making up our environment}
+\chalabel{makeEnvironment}
+			
+			\section{Installing Pharo}
+				Before start with anything, we need to be sure we have installed all the needed libraries and dependencies needed by pharo.  A default Pharo installation is usually an easy deal. But usually is not always. 
+				Be sure that you always install all the things it needs before moving forward.  
+				
+				\begin{lstlisting}[language=bash,title={\installationTool{} Installing Pharo PPA }]
+					pharos@PhaROS:~$ sudo add-apt-repository ppa:pharo/stable
+				\end{lstlisting}
+				
+				This adding of repository will make Pharo available from your ubuntu installation.
+				
+				\begin{lstlisting}[language=bash,title={\installationTool{} Installing Pharo PPA - Output }]
+				
+					More info: https://launchpad.net/~pharo/+archive/stable
+					Press [ENTER] to continue or ctrl-c to cancel adding it
+
+					\gpg: keyring `/tmp/tmpa4dlup/secring.gpg' created
+					gpg: keyring `/tmp/tmpa4dlup/pubring.gpg' created
+					gpg: requesting key 708EAA85 from hkp server keyserver.ubuntu.com
+					gpg: /tmp/tmpa4dlup/trustdb.gpg: trustdb created
+					gpg: key 708EAA85: public key "Launchpad PPA for Pharo" imported
+					gpg: Total number processed: 1
+					gpg:               imported: 1  (RSA: 1)
+					OK
+				\end{lstlisting}
+				
+
+
+				\begin{lstlisting}[language=bash,title={\installationTool{} Apt-get Update }]
+					pharos@PhaROS:~$ sudo apt-get update
+				\end{lstlisting}
+				
+				The output of this command is quite long and not very informative. Be sure that all the lines have one of the following shapes:
+					
+				\begin{lstlisting}[language=bash,title={\installationTool{} Apt-get Update }]
+					Hit http://extras.ubuntu.com raring Release                                                
+					Get:1 http://ppa.launchpad.net raring Release.gpg [316 B]  
+					Ign http://security.ubuntu.com raring-security/main Translation-en_US
+				\end{lstlisting}
+				
+					If it appear any communication error, be sure you have your network well configured, and that you can reach the ubuntu servers.
+				
+				\begin{lstlisting}[language=bash,title={\installationTool{} Apt-get Update }]
+					pharos@PhaROS:~$ sudo apt-get install pharo-launcher:i386
+				\end{lstlisting}
+				
+				The output of this last command will change depending on your architecture based ubuntu. For 32 bits, there are not much dependencies, for 64 bits there are a lot. 
+					
+				After this installation you will have available the following two command
+				
+					\begin{itemize}
+						\item pharo-vm-x		- Pharo vm for running images WITH graphical interface (x is for x11 )
+						\item pharo-vm-nox		- Pharo vm for running images WITHOUT graphical interface (nox is for not x11)
+					\end{itemize}
+				
+				Having all the dependencies installed, you can go to the next section.
+				
+				
+				
+				\newpage
+				
+				
+			\section{Installing \installationTool{}}
+					\installationTool{} idea is to make us easier all the life cycle of a robotic project. We will use it to avoid going to silly implementation details before being able to understand the core concepts. 					
+					\begin{lstlisting}[language=bash,title={Installing \installationTool{}}]
+						pharos@PhaROS:~$ wget http://car.mines-douai.fr/wp-content/uploads/2014/01/pharos.deb .
+						pharos@PhaROS:~$ sudo dpkg -i pharos.deb
+					\end{lstlisting}
+				 	
+					
+					To be sure the tool correctly installed execute the following command. 
+					
+					\begin{lstlisting}[language=bash,title={\installationTool{} help}]
+						pharos@PhaROS:~$ pharos --help
+					\end{lstlisting}
+					
+					The output for this should be something like
+					
+					\begin{lstlisting}[language=bash,title={\installationTool{} help output}]
+						pharos usage
+							pharos install					- Installs a package 
+							pharos create 					- Creates a new package based on an archetype
+							pharos create-repository			- Creates a smalltalk script for creating your own repository
+							pharos register-repository		- Register a new package repositry
+							pharos list-repositories			- List registered repostiries
+							pharos update-tool	      			- Check if there is any update of the tool, and it update it.
+							pharos ros-install				- Installs a ros
+					\end{lstlisting}
+				 	
+					
+					We will learn how to use this tool during the text. If you are eager for know it, there is a full explanation at the appendix \autoref{appendix:pharos}
+
+			\section{Installing ROS with \installationTool{}}
+			
+				One of the many things that \installationTool{} does, is to make easier our life not just for beginners, but for advanced users as well, because try to allow the bureaucracy is not about being beginner ;) 
+				
+				
+				Lets check which is the way to use the tool for this goal
+				
+				\begin{lstlisting}[language=bash,title={\installationTool{} help}]
+						pharos@PhaROS:~$ pharos --help
+				\end{lstlisting}
+					
+				\begin{lstlisting}[language=bash,title={\installationTool{} help output}]
+					pharos usage
+						pharos install					- Installs a package 
+						pharos create 					- Creates a new package based on an archetype
+						pharos create-repository			- Creates a smalltalk script for creating your own repository
+						pharos register-repository		- Register a new package repositry
+						pharos list-repositories			- List registered repostiries
+						pharos update-tool	      			- Check if there is any update of the tool, and it update it.
+						pharos ros-install				- Installs a ros
+				\end{lstlisting}
+				
+				As we can see, there is a ros-install option that can be invoked. Lets check what can it does for us:
+				
+				\begin{lstlisting}[language=bash,title={\installationTool{} for ROS installation}]
+						pharos@PhaROS:~$ pharos ros-install --help
+				\end{lstlisting}
+				
+				
+				
+				\begin{lstlisting}[language=bash,title={\installationTool{} for ROS installation}]
+	usage: pharos ros-install 
+	It installs a ROS in the machine. (Valid just for ubuntu).
+
+	Options: 
+
+	--version			version of ROS. { fuerte | groovy | hydro }. Default: groovy.
+	--type-installation	Type of ros installation { desktop | desktop-full | ros-base }. Default: desktop.
+	--configure		Indicates if the installation should be configured (modifiy .bashrc file ).{true|false} Default: true.
+	--create-workspace	Indicates if a workspace should be created. It will create a workspace at ~/ros/worskpace. { true|false }. Default: true.
+
+				\end{lstlisting}
+				
+				
+				The tool propose us several configurations, and an easy way to install by default (which is quite good by default)
+				
+				\paragraph{Version:} Specify the distribution of ROS we want to install (It should be compatible with our Ubuntu installation). By default it will try with Groovy.
+				\paragraph{Type-installation:} Specify what do we want to load. Ros-base will load just the architecture things, desktop will download several graphic tools and some stacks, desktop-full even more tools and stacks. (Check in the wiki site of each distribution to know what will be downloaded if you need more information) By default it will download desktop. 
+				
+				\paragraph{Configure:}Is a boolean value. If you are beginner, just left it with the default. It will modify .bashrc file of the current user, in order to have ROS always available. 
+				\paragraph{Create-Workspace:} Is a boolean value.  If you are beginner, just left it with the default. In order to develop we need to have a place to place our code. This place is called workspace. And if this value is true, the tool will make up a new one in the standard location.
+				
+				
+				
+				
+				This command is safe for installing because it will tell you if the ROS that you want to install is compatible with your Ubuntu installation.
+				
+				Running in an ubuntu 13.04 (Raring) , lets try to install a Fuerte distribution.
+				
+				\begin{lstlisting}[language=bash,title={\installationTool{} Installing incompatible version}]
+						pharos@PhaROS:~$ pharos ros-install --version=fuerte
+				\end{lstlisting}
+				
+				\begin{lstlisting}[language=bash,title={\installationTool{} Installing incompatible version - Output}]
+						fuerte version is not available for: raring
+				\end{lstlisting}
+				
+				
+				In order to have a rich example, i will install an hydro version in my raring ubuntu installation. 
+				
+				
+				\begin{lstlisting}[language=bash,title={\installationTool{} Installing Hydro in Ubuntu: Raring}]
+						pharos@PhaROS:~$ pharos ros-install --version=hydro
+				\end{lstlisting}
+				
+				The output of this command is quite long, but i will stripe the most significant parts. 
+				
+				\label{install:hydro}
+				\begin{lstlisting}[language=bash,title={\installationTool{} Installing Hydro in Ubuntu: Raring - Output}]
+				
+				[sudo] password for pharos:
+				Hit http://extras.ubuntu.com raring Release
+				Hit http://security.ubuntu.com raring-security/main Sources
+				Hit http://fr.archive.ubuntu.com raring-updates Release
+				Hit http://fr.archive.ubuntu.com raring-backports Release
+				Hit http://security.ubuntu.com raring-security/restricted Sources
+				Hit http://extras.ubuntu.com raring/main Sources
+				Hit http://fr.archive.ubuntu.com raring/main Sources
+				Hit http://security.ubuntu.com raring-security/universe Sources
+				Hit http://extras.ubuntu.com raring/main i386 Packages
+				Hit http://fr.archive.ubuntu.com raring/restricted Sources
+				Hit http://security.ubuntu.com raring-security/multiverse Sources
+				Hit http://fr.archive.ubuntu.com raring/universe Sources
+				Hit http://fr.archive.ubuntu.com raring/multiverse Sources
+				Hit http://security.ubuntu.com raring-security/main i386 Packages
+				[...]
+				Reading package lists...
+				Reading package lists...
+				Building dependency tree...
+				Reading state information...
+				The following extra packages will be installed:
+				  binfmt-support blt build-essential cmake cmake-data collada-dom-dev
+				  collada-dom2.4-dp-base collada-dom2.4-dp-dev comerr-dev cpp-4.4 debhelper
+				  dh-apparmor docutils-common docutils-doc doxygen doxygen-latex dpkg-dev
+				  emacsen-common fakeroot ffmpeg fonts-lmodern fonts-lyx fonts-texgyre
+				  freeglut3 g++ g++-4.4 g++-4.7 gcc-4.4 gcc-4.4-base gccxml gir1.2-gtk-2.0
+				  graphviz hddtemp html2text krb5-multidev latex-beamer latex-xcolor
+				[...]
+				libqt4-svg libqt4-test libqt4-xml libqt4-xmlpatterns libqtcore4 libqtgui4
+				  libssl1.0.0 libtiff5 libx11-6 libx11-xcb1 libxcb-dri2-0 libxcb-glx0
+				  libxcb-render0 libxcb-shm0 libxcb1 libxcursor1 libxext6 libxfixes3 libxi6
+				  libxinerama1 libxml2 libxrandr2 libxrender1 libxt6 libxxf86vm1 python2.7
+				  python2.7-minimal qdbus
+				57 upgraded, 675 newly installed, 0 to remove and 269 not upgraded.
+				Need to get 967 MB/983 MB of archives.
+				After this operation, 2 233 MB of additional disk space will be used.
+				Do you want to continue [Y/n]? Y
+				[...]
+				Get:2 http://fr.archive.ubuntu.com/ubuntu/ raring/main libgfortran3 i386 4.7.3-1ubuntu1 [326 kB]
+				Get:3 http://fr.archive.ubuntu.com/ubuntu/ raring/main libglade2-0 i386 1:2.6.4-1ubuntu2 [52,9 kB]
+				Get:4 http://fr.archive.ubuntu.com/ubuntu/ raring-updates/main libgnutls-openssl27 i386 2.12.23-1ubuntu1.1 [21,9 kB]
+				Get:5 http://packages.ros.org/ros/ubuntu/ raring/main libpcl-kdtree-1.7 i386 1.7.0-2+raring1 [239 kB]
+				Get:6 http://fr.archive.ubuntu.com/ubuntu/ raring/main libgssrpc4 i386 1.10.1+dfsg-4+nmu1 [57,5 kB]
+				...
+				Get:686 http://fr.archive.ubuntu.com/ubuntu/ raring/universe libbullet2.80 i386 2.80+sp1+dfsg-0ubuntu1 [754 kB]
+				Get:687 http://fr.archive.ubuntu.com/ubuntu/ raring/universe libbullet-dev i386 2.80+sp1+dfsg-0ubuntu1 [362 kB]
+				Preconfiguring packages ...
+				Fetched 967 MB in 14min 32s (1 109 kB/s)
+				(Reading database ... 
+				Processing triggers for man-db ...
+				Processing triggers for doc-base ...
+				Processing 1 added doc-base file...
+				Processing triggers for install-info ...
+				[...]
+				Processing triggers for libc-bin ...
+				ldconfig deferred processing now taking place
+				Processing triggers for python-support ...
+				Creating symlink "/home/pharos/ros/workspace/src/CMakeLists.txt" pointing to "/opt/ros/hydro/share/catkin/cmake/toplevel.cmake"
+				-- The C compiler identification is GNU 4.7.3
+				-- The CXX compiler identification is GNU 4.7.3
+				-- Check for working C compiler: /usr/bin/cc
+				-- Check for working C compiler: /usr/bin/cc -- works
+				-- Detecting C compiler ABI info
+				-- Detecting C compiler ABI info - done
+				-- Check for working CXX compiler: /usr/bin/c++
+				-- Check for working CXX compiler: /usr/bin/c++ -- works
+				-- Detecting CXX compiler ABI info
+				-- Detecting CXX compiler ABI info - done
+				-- Using CATKIN_DEVEL_PREFIX: /home/pharos/ros/workspace/devel
+				-- Using CMAKE_PREFIX_PATH: /opt/ros/hydro
+				-- This workspace overlays: /opt/ros/hydro
+				-- Found PythonInterp: /usr/bin/python (found version "2.7.4") 
+				-- Using PYTHON_EXECUTABLE: /usr/bin/python
+				-- Using Debian Python package layout
+				-- Using CATKIN_ENABLE_TESTING: ON
+				-- Call enable_testing()
+				-- Using CATKIN_TEST_RESULTS_DIR: /home/pharos/ros/workspace/build/test_results
+				-- Looking for include file pthread.h
+				-- Looking for include file pthread.h - found
+				-- Looking for pthread_create
+				-- Looking for pthread_create - not found
+				-- Looking for pthread_create in pthreads
+				-- Looking for pthread_create in pthreads - not found
+				-- Looking for pthread_create in pthread
+				-- Looking for pthread_create in pthread - found
+				-- Found Threads: TRUE  
+				-- Found gtest sources under '/usr/src/gtest': gtests will be built
+				-- catkin 0.5.81
+				-- BUILD_SHARED_LIBS is on
+				-- Configuring done
+				-- Generating done
+				-- Build files have been written to: /home/pharos/ros/workspace/build
+				Base path: /home/pharos/ros/workspace
+				Source space: /home/pharos/ros/workspace/src
+				Build space: /home/pharos/ros/workspace/build
+				Devel space: /home/pharos/ros/workspace/devel
+				Install space: /home/pharos/ros/workspace/install
+				####
+				#### Running command: "cmake /home/pharos/ros/workspace/src -DCATKIN_DEVEL_PREFIX=/home/pharos/ros/workspace/devel -DCMAKE_INSTALL_PREFIX=/home/pharos/ros/workspace/install" in "/home/pharos/ros/workspace/build"
+				####
+				####
+				#### Running command: "make -j1 -l1" in "/home/pharos/ros/workspace/build"
+				####
+
+
+
+				\end{lstlisting}
+				
+				
+				During this script we download all the required software of the chosen distribution, download some extra tools,  configure and initialise the basic tools. And finally we make up a catkin package which is, as final step compiled.
+				
+				
+			
+			
+			
+			
+			\section{Installing ROS by hand}
+				Further we will see that PhaROS is a library that is abstract of installation, what means that we can run a node from a machine without ROS, but having a remote ROS installation. However we need to understand ROS architecture and runtime in order to understand how to interact with it. Therefore, for the firsts examples, we need to have a machine with a running ROS installation. 
+				
+				For this we strongly recommend to use a LTS distribution of Ubuntu, but previously to make the installation, be sure that the distribution you want to use is compatible. 
+				
+				\paragraph{Fuerte}  
+						\begin{itemize}
+							\item Ubuntu 10.04 (Lucid)
+							\item Ubuntu 11.10 (Oneiric)
+							\item Ubuntu 12.04 (Precise)
+						\end{itemize}
+
+				\paragraph{Groovy}  
+						\begin{itemize}
+							\item Ubuntu 11.10 (Oneiric)
+							\item Ubuntu 12.04 (Precise)
+							\item Ubuntu 12.10 (Quantal)
+						\end{itemize}
+				\paragraph{Hydro}  
+						\begin{itemize}
+							\item Ubuntu 12.04 (Precise)
+							\item Ubuntu 12.10 (Quantal)
+							\item Ubuntu 13.04 (Raring)
+						\end{itemize}
+				
+				
+				
+				
+				\paragraph{For this achievement, you can follow one of the next tutorials }
+				
+				\begin{itemize}
+				
+					\item \url{http://wiki.ros.org/fuerte/Installation/Ubuntu}
+					\item \url{http://wiki.ros.org/groovy/Installation/Ubuntu}
+					\item \url{http://wiki.ros.org/hydro/Installation/Ubuntu}
+				
+				\end{itemize}
+				
+				
+				
+		
+
+%\chapterauthor{\authorjankurs{} \\ \authorguillaume{} \\ \authorlukas{}}
+
+
+%=============================================================
+\ifx\wholebook\relax\else
+
+
+\end{document}
+
+\fi
+%=============================================================

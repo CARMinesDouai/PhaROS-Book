@@ -1,0 +1,259 @@
+%=================================================================
+\ifx%
+\wholebook%
+\relax%
+\else
+% --------------------------------------------
+% Lulu:
+	\documentclass[a4paper,10pt,twoside]{book}
+	\usepackage[
+		papersize={6.13in,9.21in},
+		hmargin={.75in,.75in},
+		vmargin={.75in,1in},
+		ignoreheadfoot
+	]{geometry}
+	\input{../common.tex}
+	\setboolean{lulu}{true}
+% --------------------------------------------
+% A4:
+%	\documentclass[a4paper,11pt,twoside]{book}
+%	\input{../common.tex}
+%	\usepackage{a4wide}
+% --------------------------------------------
+    \graphicspath{{figures/} {../figures/}}
+    \begin{document}
+\fi
+%=================================================================
+%\renewcommand{\nnbb}[2]{} % Disable editorial comments
+\sloppy
+%=================================================================
+\chapter{\pharos Cheat sheet}
+\chalabel{cheatSheet}
+	
+	Welcome to PhaROS! \newline
+	Remember always to check for updates in \url{http://car.mines-douai.fr/squeaksource/PhaROS.html}. 	 \newline
+
+	\paragraph{Running the generated package \newline}
+	
+	The generated package has implemented some scripts to show you the basic usage of PhaROS. In PhaROS a package has scripts. Each scripts represents a Node. Each of these nodes share the same class and code. So, take that in count when you implement a new script. 
+	
+	\paragraph{Basic ROS commands for your generated package \newline}
+	
+	
+	
+	For browse your package trough command line. \newline
+	
+		roscd name-of-your-package \newline 
+	
+	For editing the image \newline
+	
+		rosrun name-of-your-package edit  \newline
+		
+	For running a script with graphical interface  \newline
+	
+		rosrun name-of-your-package pharos script-name  \newline
+	
+	 For running a script without graphical interface  \newline
+	
+		rosrun name-of-your-package headless script-name  \newline
+	
+	For listing your scripts \newline
+	
+		rosls name-of-your-package/image/scripts \newline
+	
+	\section{Inside a package object }
+	
+	\paragraph{Creating a new Script \newline}
+
+
+	
+		For creating a new script you need to add to your package class a method named script{NameOfYourScript}. Inside this method you will have available a controller, which is an object that gives construction facilities and access to an already built  node. 
+		self controller node. 
+		
+		Inside this method you configure the given node and trigger all the logic of your node. (So, from ROS point of view, each script is a node)
+		
+		In order to make this script available for execution you have two possibilities: 
+		\begin{itemize}
+			\item write a text file that executes this method ( PackageName new script{NameOfYourScript}. ) and save it into packageFolder/image/scripts 
+			\item commit all your code and use the pharos tool to install it back, this will generate all the needed files. (we are working for making this step easier) 
+		\end{itemize}
+				
+		For examples of what an script is, browse the generated example package and match names with the names available in the script folder. (roscd {package-name}/image/scripts).
+		
+	\paragraph{Publish topic  \newline}
+	
+	
+	\begin{code}
+	| publisher |
+	publisher := self controller node 
+						topicPublisher: '/example/string' 
+						typedAs: 'std-msgs/String'.
+						
+	publisher send:[ : string | string data: 'this is an example' ].
+	
+	\end{code}
+	
+	\paragraph{Subscribe topic \newline}
+
+	
+	
+	\begin{code}
+	(self controller node buildConnectionFor: '/example/string' ) 
+			typedAs: 'std-msgs/String'; 
+			for: [ : string |  Transcript show: string data ];
+			connect .
+	\end{code}
+	
+	\paragraph{Call service \newline}
+
+	\begin{code}
+	| service |
+	service := self controller node service: '/rosout/get-loggers'.
+	service call.
+	\end{code }
+	
+	
+	\paragraph{Define service \newline}
+
+	\beign{code}
+	
+	self controller node serve: [ :req :rsp | 
+		 Transcript show: 'Service has been called.'; cr.  
+	] at: '/pharos/service' typedAs:'roscpp/Empty'.
+	
+	\end{code}
+	
+	
+	\paragraph {Inject/install a nodelet \newline}
+	
+	\begin{code}
+	self controller nodelets use: YourNodeletClass as:\#nameToBeInvoked.
+	\end{code}
+	
+	
+	\paragraph{Specifying controller configuration \newline}
+	
+	In the package object implement the message \#buildController. Build controller has the responsibility to build the controller and return it. 
+	
+	For building your own controller 
+	
+	
+	
+	\begin{code}
+	buildController
+		^ MyController build	
+		
+	buildController
+		\^ self myControllerConfigurationMethod: super buildController.
+	
+	myControllerConfigurationMethod: aController
+		<< Make here your configurations >>
+		\^ aController
+		
+	\end{code}
+	
+	
+	\paragraph{Define a new type \newline}
+	
+	
+	Define as class method a method with a cool name, as myCoolTypeDefinition
+	
+	
+	\begin{code}
+	myCoolTypeDefinition
+	
+	^ PhaROSCompositeType named: 'anStandarROS/TypeName' definedBy: {
+		#header -> (PhaROSTypeBrowser instance definition: 'std-msgs/Header'). 
+		#auint8 -> (PhaROSUInt8Type new).
+		#auint16 -> (PhaROSUInt16Type new).
+		#aint32 -> (PhaROSInt32Type new).
+		#afloat32 -> (PhaROSFloat32Type new).
+		#afloat64 -> (PhaROSFloat64Type new).
+		#astring ->( PhaROSStringType new ) .
+		#atime -> (PhaROSTimeType new ). 
+	}  withConstants: {
+		#CONSTANT -> ASimpleObjectValue
+	}.
+	\end{code}
+	As shown in the definition you give an array of associations with (\#nameOfTheField -> Type new). 
+	For checking all the available types, just browse any of this classes to go to the package. Or check the reference.
+	
+	Constants values cannot be complex. Just numbers, strings, booleans. 
+	
+	
+	\paragraph{Register a type \newline}
+
+
+	Define in class side of your package the method \#types 
+
+	\begin{code}
+	types
+		^ super types, { #YourTypeName -> self myCoolTypeDefinition }.
+	
+	\end{code}
+	In order to deploy the type into ROS you will need to commit all your work and install it through the pharos command (as shown in the shell commands section). 
+	We are working to enhance this step. 
+	
+	\section{Shell commands}
+	
+	\paragraph{Install PhaROS based Package\newline}
+
+		pharos install PACKAGE [OPTIONS]\newline
+		
+		Example \newline
+			\-\-pharos install esug --location=/home/user/ros/workspace --version=2.0\newline
+		Help 
+			\-\-pharos install --help\newline
+
+	\paragraph {Create PhaROS based Package\newline}
+
+		pharos create PACKAGE [OPTIONS]\newline
+		
+		Example\newline
+			\-\-pharos create --location=/home/user/ros/workspace --version=2.0 --author=YourName --author-email=YourEmail \newline
+			\-\-Tip: Be sure the email is a correct one. If is not a correctly spelled one you will notice during last step. \newline
+		Help \newline
+			\-\-pharos create --help\newline
+		
+		
+		
+	\paragraph{Register Repository of packages  \newline}
+	
+		pharos register-repository --url=anUrl --package=aPackage [ OPTIONS ]\newline
+		
+		Example \newline
+			\-\-pharos register-repository --url=http://smalltalkhub.com/mc/user/YourProject/main --package=YourProjectDirectory --directory=YourProjectDirectory \newline
+			\-\-Tip: If your repository requires user/password for reading add --user=User --password=Password to the example. \newline
+			\-\-Disclaimer: User/Password will be stored in a text file without any security. \newline
+		Help 
+			\-\-pharos register-repository --help\newline
+		
+	\paragraph{Listing registered repositories\newline}
+	
+	
+		pharos list-repositories
+		
+		
+	\paragraph{Creating a directory for your own project repository\newline}
+
+		pharos create-repository PACKAGENAME [ OPTIONS ]\newline
+
+		Example \newline
+			\-\-pharos create-repository example --user=UserName > directory.st\newline
+			\-\-pharos create-repository example --user=UserName  --output= directory.st\newline
+		
+		Help \newline
+			\-\-pharos create-repository --help \newline
+
+
+%\chapterauthor{\authorjankurs{} \\ \authorguillaume{} \\ \authorlukas{}}
+
+
+%=============================================================
+\ifx\wholebook\relax\else
+
+
+\end{document}
+
+\fi
+%=============================================================

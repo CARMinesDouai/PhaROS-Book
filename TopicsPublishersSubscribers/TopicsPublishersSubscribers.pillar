@@ -1,0 +1,402 @@
+!Topics: publishers and subscribers
+@topics
+
+
+
+!!Installing our first example with Pharos installation tool
+
+
+
+To explain how to run a PhaROS program, first we need to have it. In order to figure this out, we will install an easy example available in the main PhaROS repositories.
+
+[[[caption=Installing chatter|language=bash
+pharos@PhaROS:~$ pharos install chatter --location={path-to-workspace} --ros-distribution={fuerte | groovy | hydro}
+
+--2014-02-03 11:11:44--  http://get.pharo.org/vm
+Proxy request sent, awaiting response... 200 OK
+Length: 5285 (5.2K) [text/html]
+Saving to: `STDOUT'
+
+100%[=======================>] 5,285       --.-K/s   in 0.007s
+
+2014-02-03 11:11:44 (772 KB/s) - written to stdout [5285/5285]
+
+Downloading the latest pharoVM:
+http://files.pharo.org/vm/pharo/linux/stable.zip
+
+--2014-02-03 11:11:46--  http://get.pharo.org/20
+Connecting to 10.1.1.3:8080... connected.
+Proxy request sent, awaiting response... 200 OK
+Length: 2587 (2.5K) [text/html]
+Saving to: `STDOUT'
+
+0% [ ] 0           --.-K/s              Downloading the latest 20 Image:
+  http://files.pharo.org/image/20/latest.zip
+100%[=======================>] 2,587       --.-K/s   in 0.002s
+
+2014-02-03 11:11:46 (1.08 MB/s) - written to stdout [2587/2587]
+
+Pharo.image
+Setting up variables, network and obtaining required code....
+Running pre process...
+Installing package...
+Running post process...
+Unloading installation code ...
+Base path: /home/pharos/workspace
+Source space: /home/pharos/workspace/src
+Build space: /home/pharos/workspace/build
+Devel space: /home/pharos/workspace/devel
+Install space: /home/pharos/workspace/install
+####
+#### Running command: "cmake /home/pharos/workspace/src -DCATKIN_DEVEL_PREFIX=/home/pharos/workspace/devel -DCMAKE_INSTALL_PREFIX=/home/pharos/workspace/install" in "/home/pharos/workspace/build"
+####
+-- Using CATKIN_DEVEL_PREFIX: /home/pharos/workspace/devel
+-- Using CMAKE_PREFIX_PATH: /home/pharos/workspace/devel;/opt/ros/groovy;/home/viki/ros/workspace/devel
+-- This workspace overlays: /home/pharos/workspace/devel;/opt/ros/groovy
+-- Using Debian Python package layout
+-- Using CATKIN_ENABLE_TESTING: ON
+-- Call enable_testing()
+-- Using CATKIN_TEST_RESULTS_DIR: /home/pharos/workspace/build/test_results
+-- Found gtest sources under '/usr/src/gtest': gtests will be built
+-- catkin 0.5.71
+-- BUILD_SHARED_LIBS is on
+-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-- ~~  traversing 1 packages in topological order:
+-- ~~  - chatter
+-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-- +++ processing catkin package: 'chatter'
+-- ==> add_subdirectory(chatter)
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/pharos/workspace/build
+####
+#### Running command: "make -j1 -l1" in "/home/pharos/workspace/build"
+####
+
+]]]
+
+
+The outline of this command is the installation of the chatter package. This chatter package includes two nodes:
+
+- Talker	-- This program read the stander input (commonly keyboard) and send it to all the listener nodes.
+- Listener	-- This program listen talkers and write the received information in the stander output.
+
+
+""Directory layout of our package""
+@package:layout
+
+ROS tools are based on a well known distribution of some folders and files in a proper place.
+This place is called workspace. Commonly since Groovy, a Catkin workspace.
+A catkin workspace is a folder with some configuration files distributed and self maintained in build and devel folders. There is also a third folder called src. In this folder we will find the packages, each folder is a package, a catkin package.
+Lets execute the command tree on the workspace and see what it show us.
+
+%\centering
+%width=0.7\textwidth
++Output tree command \label{img:tree}>file://TreeCommand.png+
+@img:ref
+
+As we can see in the \autoref{img:tree}, there are three main directories. The one we will focus is in the chatter one, inside the src folder.
+
+This is the package that we just installed. Check \autoref{img:srctree} for a file per file explanation of the chatter folder.
+
+%\centering
+%width=\textwidth
++Output tree command \label{img:srctree}>file://TreeSrcCommand.png+
+
+
+!!Executing Chatter
+
+Open a terminal and startup ROS by executing
+
+[[[caption=Starting up ROS|language=bash
+pharos@PhaROS:~$ roscore
+]]]
+
+This line will startup basic services from ROS needed to run this example. If you followed the basic installation tutorial
+\hyperlink{http://wiki.ros.org/groovy/Installation/Ubuntu}{http://wiki.ros.org/groovy/Installation/Ubuntu},
+the standard output of this command should be something like the following.
+
+[[[caption=Starting up ROS - Output|language=bash
+... logging to /home/pharos/.ros/log/a3e8bd7e-8ea0-11e3-bfbd-0800275a8d1d/roslaunch-PhaROS-12822.log
+Checking log directory for disk usage. This may take awhile.
+Press Ctrl-C to interrupt
+Done checking log file disk usage. Usage is <1GB.
+
+started roslaunch server http://localhost:39207/
+ros_comm version 1.9.47
+
+
+SUMMARY
+========
+
+PARAMETERS
+* /rosdistro
+* /rosversion
+
+NODES
+
+auto-starting new master
+process[master]: started with pid [12836]
+ROS_MASTER_URI=http://localhost:11311/
+
+setting /run_id to a3e8bd7e-8ea0-11e3-bfbd-0800275a8d1d
+process[rosout-1]: started with pid [12849]
+started core service [/rosout]
+]]]
+
+
+
+In one terminal (T1) execute the following command
+
+[[[caption=Starting up listener|language=bash
+pharos/Pharos$~: rosrun chatter headless listener
+]]]
+
+
+The expected output (For other outputs, check the FAQ) of this command is:
+
+[[[caption=Listener output|language=bash
+Starting up Listener
+You will read here all the text written in talker nodes
+]]]
+
+
+In other terminal (T2) execute the following command
+
+[[[caption=Starting up talker|language=bash
+pharos/Pharos$~: rosrun chatter headless talker
+]]]
+
+The expected output (For other outputs, check the FAQ) of this command is:
+
+[[[caption=Talker output|language=bash
+Starting up Talker
+Write your input and press enter
+]]]
+
+
+In the same console (The talker one) write something funny and press enter.
+
+To see the following output
+
+[[[caption=Talker output 2|language=bash
+Sending data to all subscribers
+]]]
+
+And to see in the listener console (T1), the following output.
+
+[[[caption=Listener output 2|language=bash
+/PharoHandle-1391678151 said: {YOUR FUNNY COMMENT}
+]]]
+
+The node names in PhaROS, by default, are generated randomly, as PharoHandle-{GeneratedNumber}.
+
+
+Now, if we try to add a new listener, repeating the process of the listener in a new console, you will see  that this listener will also echo what ever you write in the talker console.
+
+This is because in ROS architecture, the communications are stablished through named channels (Topics), all the processes that are connected to the same channel as publishers, talk to the same audience, all the processes that are connected as subscriber listen the same contents.
+
+
+But, do not just believe me, lets see the code. In a terminal run the following command.
+
+
+!!!Inspecting the code
+@sssection:chatterinspect
+
+Pharo is a language that has it own IDE integrated, ready to use. With this line and the line that each package of PhaROS is one image, we will be able to have an editor able to edit each of our package installations.
+
+For inspecting the code of the chatter we just need to execute the following line in a console (This execution don't need to have ROS platform running).
+
+[[[caption=Editing|language=bash
+pharos/Pharos$~: rosrun chatter edit
+]]]
+
+
+This command will open a Pharo IDE.
+
+%\textwidth
+%\centering
++Pharo IDE>file://pharos.png+
+
+Once in the IDE, lets browse the ChatterPackage class (shift+enter, write ChatterPackage into the spotlight. That will do the magic).
+
+%\textwidth
+%\centering
++Pharo IDE \label{img:spotlight>file://SpotlightPharo.png+
+
+
+%\textwidth
+%\centering
++Chatter>file://ChatterView.png+
+
+
+In this class we encounter two method categories in the instance side. "scripts" and "private". For keeping simple the things we will browse just scripts now.
+Here we can find the methods scriptTalker and scriptListener.
+
+
+
+Lets browse them.
+
+""Listener""
+
+
+[[[language=smalltalk
+ChatterPackage>>#scriptListener
+self log: 'Starting up Listener '.
+(self node buildConnectionFor:  '/chat/channel')
+  typedAs: 'std_msgs/String' ;
+  for: [ : aMsg :aChannel |
+    self stdout nextPutAll: aChannel owner name, ' said:'.
+    self stdout  nextPutAll: aMsg data.
+    self stdout  nextPutAll: String lf.
+   ];
+  connect.
+
+self log: 'You will read here all the text written in talker nodes'.
+]]]
+
+
+Before break the code in pieces, is important to understand the semantic of the operator ;. In Pharo ; means that this message will be sensed to the object that received the previous message. We can rewrite the code as
+
+[[[language=smalltalk
+ChatterPackage>>#scriptListener
+| builder |
+self log: 'Starting up Listener '.
+builder := (self node buildConnectionFor:  '/chat/channel').
+builder typedAs: 'std_msgs/String'.
+builder for: [ : aMsg :aChannel |
+    self stdout nextPutAll: aChannel owner name, ' said:'.
+    self stdout  nextPutAll: aMsg data.
+    self stdout  nextPutAll: String lf.
+   ].
+builder connect.
+self log: 'You will read here all the text written in talker nodes'.
+]]]
+
+
+[[[language=smalltalk
+ChatterPackage>>#scriptListener
+| builder |
+self log: 'Starting up Listener '.
+builder := (self node buildConnectionFor:  '/chat/channel').
+]]]
+This lines define a variable builder, log to the stdout and ask the related internal node (Which is already builded and configured and represents our gateway to ROS) for a builder to connect to the topic named '/chat/channel'.
+
+[[[language=smalltalk
+builder typedAs: 'std_msgs/String'.
+]]]
+
+Typed as the ROS type std\_msgs/String. What means that the subscription resultant of this building will receive this kind of data.
+
+
+[[[language=smalltalk
+builder for: [ : aMsg :aChannel |
+    self stdout nextPutAll: aChannel owner name, ' said:'.
+    self stdout  nextPutAll: aMsg data.
+    self stdout  nextPutAll: String lf.
+   ].
+]]]
+
+For the specified callback. This callback is very easy, it just write to the console 'The owner of the channel said ... ' And at the end it adds a lf character.
+
+[[[language=smalltalk
+builder connect.
+self log: 'You will read here all the text written in talker nodes'.
+]]]
+
+Finally, the message connect will make all the magic to happen.
+From now on, all communications that arrive in name of '/chat/channel' will be managed by the given block of code.
+
+
+""Talker""
+
+
+Given the need of a thread for this script, in order to make it easy to read we have splitted it into two methods.
+
+[[[language=smalltalk
+ChatterPackage>>#scriptTalker
+| publisher |
+self log: 'Starting up Talker'.
+publisher := self node topicPublisher: '/chat/channel' typedAs: 'std_msgs/String'.
+self paralellize looping talkTo: publisher.
+self log: 'Write your input and press enter'.
+
+ChatterPackage>>#talkTo: publisher
+| token |
+publisher send: [ : m |
+token :=self stdin upTo: Character lf.
+self log: 'Sending data to all subscribers'.
+m data: token.
+].
+]]]
+
+Let split this code into understandable pieces.
+
+[[[language=smalltalk
+scriptTalker
+| publisher |
+self log: 'Starting up Talker'.
+publisher := self node topicPublisher: '/chat/channel' typedAs: 'std_msgs/String'.
+]]]
+
+This lines define the variable publisher, log a welcome message and ask to related internal node (Which is already builded and configured and represents our gateway to ROS) for publisher for the topic called '/chat/channel', typed as std_msgs/String for assign it to the variable publisher.
+This means that after this line we will have in our publisher variable a publisher object that allow us to send messages to this topic, in the proper typed way.
+
+[[[language=smalltalk
+self paralellize looping talkTo: publisher.
+self log: 'Write your input and press enter'.
+]]]
+
+From the following two lines, the second one is the easiest, it just log a need-for-action message to the user. But the first one is tricky. Thanks to TaskIT framework, this means paralellize inside an infinite loop the following message send. Which is talkTo: publisher.
+
+This means that from now on, there will be a thread running inside a loop the following code
+
+[[[language=smalltalk
+self talkTo: publisher.
+]]]
+
+
+What lead us to the next part of the code. The #talkTo: method .
+
+
+[[[language=smalltalk
+ChatterPackage>>#talkTo: publisher
+| token |
+publisher send: [ : m |
+token := self stdin upTo: Character lf.
+self log: 'Sending data to all subscribers'.
+m data: token.
+].
+]]]
+
+This method do not need to be breached, because the code is quite easy to understand in general. The only strange message is #send:
+
+A publisher object in PhaROS understand the message #send: and receives a block of code. This block of code should receive the message to be sent in order to configure it. So you don't need to worry about how to build this type, or even if this type exists actually in the image. What you know is that the type will exist when the code is being executed. And that it will be managed as a typical DTO, trough setters and getters.
+
+Because of this, we know that m will have the type std_msgs/String. Which is an object with a field called data, of type string.
+Inside the block we read the standard input, log a working-message to the user and set up the message object.
+
+In the big picture, this means that we have set up a thread running in a loop asking reading what the user introduce and sending it to the '/chat/channel' topic.
+
+
+
+!!What we learned
+
+From console
+
+- pharos install chatter --location={your-workspace}
+   -- Install chatter package in you ROS workspace
+- rosrun chatter headless listener
+  -- Starts up a listener process
+- rosrun chatter headless talker
+  -- Starts up a talker process
+- rosrun chatter edit
+  -- Starts up the editor on the chatter package
+
+
+From a PhaROS package
+
+- self node topicPublisher:{TopicName} typedAs:{TopicType}
+  -- Construct a publisher for the given topic
+- (self node buildConnectionFor:{TopicName}) typedAs:{TopicType};for:[:aMsg \textpipe{ACallBack}];connect.
+  -- Construct a subscription to the given topic and callback.

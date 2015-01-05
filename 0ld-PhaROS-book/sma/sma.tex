@@ -1,0 +1,311 @@
+
+%=================================================================
+\ifx%
+\wholebook%
+\relax%
+\else
+% --------------------------------------------
+% Lulu:
+	\documentclass[a4paper,10pt,twoside]{book}
+	\usepackage[
+		papersize={6.13in,9.21in},
+		hmargin={.75in,.75in},
+		vmargin={.75in,1in},
+		ignoreheadfoot
+	]{geometry}
+	\input{../common.tex}
+	\setboolean{lulu}{true}
+% --------------------------------------------
+% A4:
+%	\documentclass[a4paper,11pt,twoside]{book}
+%	\input{../common.tex}
+%	\usepackage{a4wide}
+% --------------------------------------------
+    \graphicspath{{figures/} {../figures/}}
+    \begin{document}
+\fi
+%=================================================================
+%\renewcommand{\nnbb}[2]{} % Disable editorial comments
+\sloppy
+%=================================================================
+\chapter { The SMA (SRMA) pattern }
+\chalabel{sma}
+					
+					I always use to say that a design or even an architectural pattern has to patterns inside. The one that we use to see, the solution pattern, and the one we use to avoid, the problem pattern. 
+					
+					A pattern then is a guide, when you see something that looks like 'problem-pattern' you can end up doing something like 'solution-pattern'. 
+					For architecture patterns, the 'something like' part of the sentence, is a bit more strict, because once you defined the architecture layout, you want to be as tight as you can from respecting it, and what we propose here is an sub architectural one. 
+					
+					I call it sub architectural because we are already in the ROS architecture, the main general lines are already drawn. What we are drawing here is the architecture of the node or process we want to program.
+					
+					
+					\section {The Problem Pattern} 
+					
+					Until here we have seen several examples about how to make our node to be communicated and how to make it part of a larger system, but in technology terms. Aiming to learn how to use the basics of ROS and PhaROS.
+					
+					We tried use some cool abstractions to respect our own philosophy, but some times, in order to keep it simple we did not put much emphasis, so the connections of ROS are easy to understand in our domain. 
+					
+					But, it happens that we don't want to make it that way. We don't want our code to be obviously connected with ROS, because we want to scope the connections and ROS knowledge as much as we can.
+					
+					ROS Topics are cool, and organic, but really hard to manage and track. Since the connection is done by name, you \textbf{really} need to guarantee that there will not be collisions of names. 
+					
+					By other side, the needed of adaption of a code to work with one or other type is quite common. If your code is tightly related to the type definition of a topic, you will need to write it again each time you need to deal with different nodes, or add infinite adapter nodes in the middle, generating even more noise in the definition of what the system is. 
+					
+					Also if we analyse a common node has three parts: a part when it consumes sensors, and synchronise them if needed. A part where it make calculations about the sensed data, and the part where it stimulates other nodes (or hardware) based on the sensed information.
+					
+					Al this three parts use to be mixed in the same code.
+					
+					
+					\paragraph{This has a lot of dirty implications}
+					
+					
+					\begin{itemize}
+						\item You \textbf{hardly can reuse} your model with other sensors
+						\item You need to define the sensor logic \textbf{each time} you use the same sensor
+						\item You need to write down the name of the sensor topics each time you define a connection \textbf{repeating yourself} an annoying amount of times
+						\item Your sensor logic is just \textbf{testable if the whole system is working}.
+						\item Your sensor logic is \textbf{not unitary testable}.
+						
+						\item Your solution code is \textbf{coupled with ROS}.
+						\item Your solution code is \textbf{coupled with the distribution of ROS}.
+						\item Your solution code is \textbf{coupled with nodes} you use through the names and types defined by this nodes. 
+						\item Your solution code is \textbf{not unitary testable}.
+						\item Your solution code is \textbf{not testable for requirement achievement}.
+						\item Your solution code needs a \textbf{whole ROS installation to be tested}. 
+						
+						\item You \textbf{hardly can reuse} your model with other actuators
+						\item You need to define the way to interact with the defined actuators \textbf{each time} you use them 
+						\item You need to write down the name of the actuator topics each time you define a connection \textbf{repeating yourself} an annoying amount of times
+						\item Your actuator logic is \textbf{not unitary testable}.
+						\item Your actuator logic is just \textbf{testable if the whole system is working}.
+						\item Your experiments are really \textbf{hard to reproduce}.
+			
+					\end{itemize} 
+					
+					
+					
+					
+					
+					\section{The solution pattern}
+					
+					
+					Inspired in MVC pattern, adapted for robotics, we defined the SMA pattern, or SRMA, acronyms of 
+					\textbf{Sensor - (Reactive) Model - Actuator pattern}. 
+					
+					
+					
+					A first view of the code outline with this pattern
+					
+					
+					\begin{code}
+			
+			MyPackage>>#configureModel
+				" Reactive Model configuration "
+				map := Map new.
+				map onRobotOutOfRangeDo: [ : pose | 
+					self actuator pathplanner scheduleGoal: (map closestBoundTo: pose).
+				] cooldown: 20 seconds.
+		
+		
+			MyPackage>>#scriptBoundController
+			
+				self configureModel.
+				
+				self clock tickAt: 2 hz on: ({
+					self sensor pose.
+				} asSensorBundle tolerance: 1 second);
+				  for: [
+				 : robotPose |
+					" Model feeding "
+				 	 map noteRobotAt: aRobotPose.
+				]
+						
+						
+					\end{code}
+					
+					
+					
+					But before go to the big picture, lets presents the concepts
+					
+					
+					
+					\subsection{Sensors}
+					
+					 We define as sensor, an object that act as that. Any input that give us information about our domain is treated as a sensor. Some of them will be actual sensors, others can be processed data from a sensor, (by example, pose distilled from and odometry sensor), or high-level sensors, like when some logic state of our system changes, usually because of an actual sensor.
+					
+					Our classification then can be briefed as
+					
+					\begin{itemize}
+						\item Environment perception \begin{itemize}
+								\item Raw data:  Laser, odometry, telemeters, etc. 
+								\item processed data: Pose, occupancy, etc
+							\end{itemize}
+						\item Self perception: battery state, laser state rate, etc.
+						\item System(Logic) perception: Objects encountered, Critic battery state reached, Forbidden area reached. 
+					\end{itemize}
+					
+					
+					
+					
+					
+					\subsection {Actuators}
+					
+					We define as actuator any object susceptible to be controlled. Any thing that needs an input to change it state is treated as an actuator. Is an object that will give us the chance to make it do something by given the proper data.
+					Some of this actuators will be actual actuators, some of them will have a real impact over the environment (like legs, differential drive, arms, etc), others will just have impact over the robot (start/stop sensors), others will have impact over our system, by example, setting a goal to a path planner.
+					
+					
+					Our classification then can be briefed as
+					
+					\begin{itemize}
+						\item Phyisical modification \begin{itemize}
+								\item Environment modification: Differential drive, arms usage, legs usage, lightsaber, etc. 
+								\item Self modification: Start/stop devices.
+							\end{itemize}
+						\item System (Logic) modification: Inform object recognition, inform a point to reach.
+					\end{itemize}
+
+				
+					
+			
+					
+					
+					\subsection{ Reactive Model } 
+					
+						Ok, we have read about models in a lot of places. Is about make up the concepts needed to make a model of what ever we need to deal with. By example, an array of bits can be the way to model an image. 
+						
+						We want to tight our selves to Domain driven design as much as we can. So, we want our models to be highly coupled to the domain. 
+						
+						This domain model, in order to match with our SMA pattern, need to take in care also the following facts
+						
+						
+						\begin{itemize}
+							\item Punctual ways to feed the model
+							\item Punctual ways to give feedback
+						\end{itemize}
+						
+						This means, being able to have a nice way to interact with sensors that will give information from different threads and actuators, that we want to not have them referenced inside our model. 
+						
+						We define as reactive model a model that reacts somehow to the changes proposed by the sensors caption. 
+						For this part, we chosen to model the reaction with events.			
+					
+					
+						
+						Lets analyse the code of the beginning.
+						
+							\begin{code}
+			
+			
+			MyPackage>>#configureModel
+				" Reactive Model configuration "
+				map := Map new.
+				map onRobotOutOfRangeDo: [ : pose | 
+					self actuator pathplanner scheduleGoal: (map closestBoundTo: pose).
+				] cooldown: 20 seconds.
+		
+		
+			MyPackage>>#scriptBoundController
+			
+				self configureModel.
+				
+				self clock tickAt: 2 hz on: ({
+					self sensor pose.
+				} asSensorBundle tolerance: 1 second);
+				  for: [
+				 : robotPose |
+					" Model feeding "
+				 	 map noteRobotAt: aRobotPose.
+				],
+						
+						
+					\end{code}
+					
+					
+					We have two methods. On that make up the model. This example is illustrative, you should have the initialisation of the model probably in the package, and in the node configuration just the specific configuration of the node. 
+					
+					The model related is a map. This map has the characteristic that it knows the places that are forbidden for the robot. 
+						
+					In order to react to this, when the robot is not in range, it has a callback for event handler, that is set with \#onRobotOutOfRangeDo:.
+					
+					In this case the callback will ask to the actuator to schedule as goal the closest point inside an allowed area. This action will have a cool down of 20 seconds (This means that the model will not execute again this callback before 20 seconds).
+					
+					
+					Lets analyse now the main node code. 
+					
+				\begin{code}
+					self clock tickAt: 2 hz on: ({
+						robot sensor pose.
+					} asSensorBundle tolerance: 1 second);
+					for: [ : pose | callback ]
+				\end{code}
+					
+					This code spawn thread 'clock' that runs at 2hz ticking (sending the message tick) to a sensor bundle. A sensor bundle is a collection of sensors that should be synchronised. For this, the bundle has a tolerance of 1 second ( a message with more than 1 second is considered obsolete and dropped). Each time the tick has a synchronised response, it executes the given callback with all the sensors data. 
+					
+					
+				\begin{code}
+					  for: [  : robotPose |
+						" Model feeding "
+				 		  map noteRobotAt: aRobotPose.
+					],
+				\end{code}
+					
+					
+				Our synchronised sensor callback has the responsibility of feeding the model with the proper information. 
+				
+				Then in de end, the model will respond to this information, rising an event when the robot is out of range.
+					
+				
+				
+				\section{How does this pattern help us??} 
+				
+				\paragraph { Expressivity }
+				
+				The first thing to get is the fact that the lines needed for setting up the node are quite understandable. We have an specific place for placing to actuators configuration, one specific place for the sensor perception. 
+				
+				We reach a programming 
+				
+				
+				We have nothing related with topic naming or typing in the code, actually we have no idea if any of our code is related with topics. Neither if is related with ROS.
+				
+				
+				Since both, sensor and actuator are points of injection, replace one source for other, is trivial. 
+				
+				For testing your domain, you can rely on the working system, or mock one or more of the related artefacts and inject them during setup. 
+				
+				You can mock the sensors, relating it with known easy data, or with files of sensor dump.
+				You can easily mock actuators and check messages sent, what is the most important part from our side of testing. 
+				
+				
+				Since the sensor encapsulate what is related with each punctual sensor, you can reuse this logic all the times you need it, and the same happens with the actuators.
+					
+				In the cases that you need your node to use other sensors, or other actuators, you can write a SensorAdapter, or ActuatorAdapter, that makes a sensor look like the expected sensor. 
+				
+				If the sensor is quite different, probably you don't want to use the same node. 
+				
+				This model lead us to have all the configuration of sensors and actuators of all the system in just one really coherent place. Meaning that the experiments will be easier to reproduce and far easier to adapt. 
+				
+				
+				
+				And in the end, for testing requirement meetings, you just need to test event rules. If the event rules are ok, and the actuators mock receive the expected messages with the expected sensor entry, the requirements are meet. 
+
+				
+				\section{What we learned}
+				
+				Using SMA pattern for defining almost possible nodes in this architecture is a good idea. The effort required for making it happen benefit back with high quality through expressivity, reusability and testability. 
+				 
+				 
+				Use sensor bundles to have synchronisation based on specified tolerances . Use the rate to make your system performant enough. Make your model to be reactive, is the smarter choice to model a behaviour (what is by nature reactive). 
+				
+				Note: We will have a real complete example of usage and good for understanding soon :) .
+				
+				
+
+%\chapterauthor{\authorjankurs{} \\ \authorguillaume{} \\ \authorlukas{}}
+
+%=============================================================
+\ifx\wholebook\relax\else
+
+
+\end{document}
+
+\fi
+%=============================================================

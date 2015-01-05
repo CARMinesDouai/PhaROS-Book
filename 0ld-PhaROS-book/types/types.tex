@@ -1,0 +1,328 @@
+%=================================================================
+\ifx%
+\wholebook%
+\relax%
+\else
+% --------------------------------------------
+% Lulu:
+	\documentclass[a4paper,10pt,twoside]{book}
+	\usepackage[
+		papersize={6.13in,9.21in},
+		hmargin={.75in,.75in},
+		vmargin={.75in,1in},
+		ignoreheadfoot
+	]{geometry}
+	\input{../common.tex}
+	\setboolean{lulu}{true}
+% --------------------------------------------
+% A4:
+%	\documentclass[a4paper,11pt,twoside]{book}
+%	\input{../common.tex}
+%	\usepackage{a4wide}
+% --------------------------------------------
+    \graphicspath{{figures/} {../figures/}}
+    \begin{document}
+\fi
+%=================================================================
+%\renewcommand{\nnbb}[2]{} % Disable editorial comments
+\sloppy
+%=================================================================
+\chapter{Types: Topics and services }
+\chalabel{types}
+
+				\paragraph{Answering the unanswered questions \newline\newline}
+				During the analysis of the Donatello example there were some questions that appeared but we did not respond during the analysis. This questions are:
+				
+				\begin{itemize}	
+					\item The Switch type belongs to our package?
+					\item How do i define a type?
+				\end{itemize}
+			
+				This questions a fair questions, but need to answer an other question that it maybe appeared maybe not, but is a bit more abstract. What is a type? 
+				
+				\section{ROS Types}
+				
+				In the first time that it appeared a type i just told 'this is the kind of data that the topic will send' 
+				
+				And it is indeed. A type is an structure that defines which information will be sent and received, and also it defines how it will be marshalled and unmarshalled to travel in the ROS channels. 
+
+				Since is a structure for data sending, and is some how shared with all the rest of ROS nodes that are interested in, this types are not more than a \textbf{structure}. This means that this types have no related behaviour. 
+				
+				
+				In a ROS system we have three kind of types. 
+				
+				\begin{itemize}	
+					\item Basic types (which can be used \textbf{only} for defining the other two kinds of types) \begin{itemize}	
+							\item int8, int16, int32, int64,  uint8, uint16, uint32, uint64 
+							\item float32, float64
+							\item string
+							\item boolean
+							\item time, duration
+							\item array and fixed array ([] [N])
+						\end{itemize}
+					\item Topic types (Or message type) 
+					\item Service types
+				\end{itemize}			
+				
+				
+				The first classifications are the basic tool that we have for defining topic and services types. This are all the types defined also in the protocol of serialisation.  Topic and service types just have a way to deal with the structure, but in the end is the kind of inlining  of all the basic types.
+				
+				Then the main difference in between a service type and a topic type is that the service one has two parts (as we saw during the previous analysis): request and response.
+				
+				
+				\section{Topic or Message type}
+				
+					In ROS world, Topic types are defined in a .msg file in the msg folder of the respective package. 
+					
+					A common Message type is called std-msgs/Header. If we execute 
+					
+			\begin{lstlisting}[language=bash,title={ Browsing Topic types }]
+				pharos@PhaROS:~$ rosmsg show std_msgs/Header
+			\end{lstlisting}
+			
+			
+			 \begin{lstlisting}[language=bash,title={ std-msgs/Header definition }]
+				uint32 seq
+				time stamp
+				string frame_id
+			\end{lstlisting}
+		 
+		 			If we want to find the type definition, we just need to execute
+					
+			\begin{lstlisting}[language=bash,title={ Browsing Topic types }]
+				pharos@PhaROS:~$ roscd std_msgs/msg
+				pharos@PhaROS:~$ ls -l Header.msg
+				-rw-r--r-- 1 root root 500 Sep  6 00:42 Header.msg
+			\end{lstlisting}
+			
+					But this is just the definition of the type, is not the type it self. The life time of a ROS package involves c/c++/python code generation, and compilation as well. 
+					We will no go deep in this topic, which is extended in the ROS reference. \cite{REF}
+					
+				
+				\section{Service type}
+				
+				
+					As we saw before, a service type is browsed with a similar command as rosmsg, which is called rossrv. Lets browse the only standard type for services std-srvs/Empty
+					
+			\begin{lstlisting}[language=bash,title={ Browsing service types }]
+				pharos@PhaROS:~$ rossrv show std_srvs/Empty
+			\end{lstlisting}
+			
+			
+			 \begin{lstlisting}[language=bash,title={ std-srvs/Empty definition }]
+				---
+			\end{lstlisting}
+					
+					Ok is not very cool definition, but is the only one i can be sure that is there to be browsed.
+					The service type definitions are stored in a folder named srv, in the related package, as a .srv file. So, we can do
+					
+			\begin{lstlisting}[language=bash,title={ Browsing Service types }]
+				pharos@PhaROS:~$ roscd std_srvs/srv
+				pharos@PhaROS:~$ ls -l Empty.srv
+				-rw-r--r-- 1 root root 3 Oct  4 10:13 Empty.srv
+			\end{lstlisting}
+				
+				
+					Just as the topic type definition, the service types are also generated and compiled, and pretty well explained in the ROS Reference. 
+					
+			\subsubsection{ Automatising types with \installationTool{}l }
+				
+				If you want to make things manually, you should go to the cites pointed before. And take in care the fact that the Pharo code life cycle is not cool dealing with files. 
+				
+				In order to make easy our lives in several aspects, \installationTool{} provides a way to automatise all the lifecycle of both topic and service types. Including dependency analysis, and ros files generation (makefiles, xml, and .msg/.srv ). 
+				
+				Is quite important remember that in order to have this feature available, you \textbf{must} install/create packages with \installationTool{}.
+				
+				
+				Lets go back to donatello then. And go to the package side class, to browse the method \#types. 
+				
+				This method returns all the types that this package define. 
+				
+				
+				\begin{code}
+				DonatelloPackage class>>#types
+					^ { 
+						self switchCommandServiceType.
+					 }
+					 
+				\end{code}
+				
+				\begin{code}
+				switchCommandServiceType
+					^
+						ROSType service named: #Switch package: #donatello request:{
+							String constant:#random value: 'random'.
+							String constant:#quiet value: 'quiet'.
+							String constant:#pharo value: 'pharo'.
+							String constant:#pursuiter value: 'pursuiter'.
+							String constant:#circular value: 'circular'.
+							String named: #command.
+							String named: #turtleID.
+						} response: { 
+						}.
+				
+				\end{code}
+				
+				If we compare this code with the definition printed by rossrv
+				
+			 \begin{lstlisting}[language=bash,title={ donatello/Switch definition }]
+				string random='random'
+				string quiet='quiet'
+				string pharo='pharo'
+				string pursuiter='pursuiter'
+				string circular='circular'
+				string command
+				string turtleID
+				---
+				# empty
+			\end{lstlisting}
+			
+				We can see that is almost the same. 
+				
+				Generalising in a snippet of code, we know now that for defining a service type we need to write:
+				
+				
+				
+			\begin{code}
+					ROSType service named: #Switch package: #donatello request:{
+							{Type} constant:#constantName value: constantValue.
+							{OtherType} named: #variableName
+						} response: { 
+							{Type} constant:#constantName value: constantValue.
+							{OtherType} named: #variableName
+						}.
+			\end{code}
+			
+				The valid types to use inside a type definition are:
+			
+			\begin{code}
+				Int8, Int16, Int32, Int64
+				Uint8, Uint16, Uint32, Uint64
+				String, Time, Duration
+				Float32. Float64
+				FixedArray, Array
+				ROSType 
+			\end{code}
+			
+			For the cases of FixedArray and Array, that are complex types (types that are typed inside), the way to define a field is a bit different:
+
+			
+			
+			\begin{code}
+					ROSType service named: #Switch package: #donatello request:{
+							FixedArray named: #name sized: 20 ofType: Int8 .
+						} response: { 
+							Array named: #name ofType: String
+						}.
+			\end{code}
+			
+			
+			Finally if you want to use a type defined in ROS, you should use ROSType. That is used like
+			
+			
+			\begin{code}
+					ROSType service named: #Switch package: #donatello request:{
+							ROSType definedBy: 'std_msgs/String' named: #string .
+						} response: { 
+							ROSType definedBy: 'std_msgs/Header' named: #header .
+						}.
+			\end{code}
+			
+			Note that FixedArray, Array and ROSType does no have constant example. This is because is not supported by ROS.
+			
+			
+			If the type you are looking to create is not a service type, but a topic one, the code that you need to write is quite similar. 
+			
+			
+			\begin{code}
+					ROSType message named: #Switch package: #donatello defined:{
+							{Type} constant:#constantName value: constantValue.
+							{OtherType} named: #variableName
+						} 
+			\end{code}
+				
+			The only difference is that it has not two parts definition but just one. 
+			The types you can use inside the definition are the same as for the service: all the basic types and any of the message types defined in ROS. (Service type are not allowed for definition)
+			
+			
+			During the life cycle of the package, only when is installed/created by \installationTool{}, each time you change the type method, all your types will be generated. They will be generated also during the installation.
+			
+			Other thing that it will be generated are the scripts. Every method which it selector starts with the word 'script' inside the package related with the image installation, it will have related a file with the same name (without the script part) with the ROS convention, available the entry point to execute each script with rosrun command. 
+			
+			
+			
+			\section{What we learned }
+			
+			
+				From console
+				
+				\begin{itemize}
+					\item rosmsg show typeId
+						\newline \-\- Shows the definition of a message/topic type
+					\item roscd package/msg
+						\newline \-\- Lead us to the folder where the message types are defined
+					\item roscd package/srv
+						\newline \-\- Lead us to the folder where the service types are defined
+					\item pharos install package / pharos create package
+						\newline \-\- Both commands leave residual resident code for managing the life cycle of our package.
+				\end{itemize}
+				
+				
+				From image 
+				
+				\begin{itemize}
+				
+					\item For defining a topic/message type i need to write 
+						\newline
+						\begin{code}
+						ROSType message named: #Switch package: #donatello defined:{
+							{Type} constant:#constantName value: constantValue.
+							{OtherType} named: #variableName
+						} 
+						\end{code}
+				
+					\item For defining a service type i need to write 	
+						\newline
+						\begin{code}
+						ROSType service named: #Switch package: #donatello request:{
+							{Type} constant:#constantName value: constantValue.
+							{OtherType} named: #variableName
+						} response: { 
+							{Type} constant:#constantName value: constantValue.
+							{OtherType} named: #variableName
+						}.
+						\end{code}
+					\item For letting pharos resident code to manage my types i need to define them in \#types class method of my package. 
+				\end{itemize}
+
+
+
+				Conceptually, since \fwkName{} Framework don't need to run inside an environment with ROS installed: 
+				
+				\begin{itemize}
+					\item \fwkName{}  Framework is not responsible for generating scripts
+					\item \fwkName{}  Framework is not responsible for generating types
+					\item \fwkName{}  Framework is not responsible for generating package.xml and CMakeLists.txt
+				\end{itemize}
+				
+				
+				By other hand, \installationTool{} provides a way to install a package into a catkin workspace and deal with the implications of being in a ROS installation: 
+				
+				\begin{itemize}
+					\item \installationTool{} will generate all your scripts
+					\item  \installationTool{} generate all the specified types 
+					\item  \installationTool{} generate both package.xml and CMakeLists.txt
+				\end{itemize}	
+
+
+%\chapterauthor{\authorjankurs{} \\ \authorguillaume{} \\ \authorlukas{}}
+
+
+%=============================================================
+\ifx\wholebook\relax\else
+
+
+\end{document}
+
+\fi
+%=============================================================

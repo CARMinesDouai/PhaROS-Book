@@ -1,0 +1,344 @@
+%=================================================================
+\ifx%
+\wholebook%
+\relax%
+\else
+% --------------------------------------------
+% Lulu:
+	\documentclass[a4paper,10pt,twoside]{book}
+	\usepackage[
+		papersize={6.13in,9.21in},
+		hmargin={.75in,.75in},
+		vmargin={.75in,1in},
+		ignoreheadfoot
+	]{geometry}
+	\input{../common.tex}
+	\setboolean{lulu}{true}
+% --------------------------------------------
+% A4:
+%	\documentclass[a4paper,11pt,twoside]{book}
+%	\input{../common.tex}
+%	\usepackage{a4wide}
+% --------------------------------------------
+    \graphicspath{{figures/} {../figures/}}
+    \begin{document}
+\fi
+%=================================================================
+%\renewcommand{\nnbb}[2]{} % Disable editorial comments
+\sloppy
+%=================================================================
+\chapter { Advanced topics subscriptions }
+\chalabel{advancedTopicsSubscription}
+				
+
+					\section{Adapting incoming data}
+						
+						Topic connections are typed, what is obviously needed for high-performance transference, but it makes to repeat a lot of code, just because types just not match. 
+						
+						A common example is to have a code that works with a Pose type:
+					
+						\begin{lstlisting}[language=bash,title={ rosmsg - show }]
+						 pharos@PhaROS:~$ rosmsg show geometry_msgs/Pose
+						
+						 geometry_msgs/Point position
+							  float64 x
+							  float64 y
+							  float64 z
+						geometry_msgs/Quaternion orientation
+							  float64 x
+							  float64 y
+							  float64 z
+							  float64 w
+						\end{lstlisting}
+
+						But we are subscribing to a PoseStamped type:
+						
+						
+						\begin{lstlisting}[language=bash,title={ rosmsg - show }]
+						 pharos@PhaROS:~$ rosmsg show geometry_msgs/PoseStamped
+						
+						 std_msgs/Header header
+								  uint32 seq
+								  time stamp
+								  string frame_id
+						geometry_msgs/Pose pose
+							  geometry_msgs/Point position
+								    float64 x
+								    float64 y
+								    float64 z
+						  	  geometry_msgs/Quaternion orientation
+								    float64 x
+								    float64 y
+								    float64 z
+								    float64 w
+
+						\end{lstlisting}
+						
+						
+						
+						so, we will need to write a different callback for each case, just because the type is not the same. 
+						
+						Or even better, we may have a piece of software that uses instead of a ROS type, a domain type, which is always mapped the same way from a given ROS type.
+						
+						For solving this kind of problems we have a concept called Adaption.
+
+
+
+						\subsection{Navigating data}
+						
+							A common case then, is to need by example, the pose, instead the pose stamped. For this case, what we need is to adapt the incoming data, in order to execute the callback with the information available in the pose field of the object.
+							
+							\begin{code}
+				(self controller node buildConnectionFor: '/example/pose/stamped' ) 
+					typedAs: 'geometry_msgs/PoseStamped'; 
+					adaption: #pose;
+					for: [ : pose |  Transcript show: pose ];
+					connect .
+					
+							\end{code}
+							
+							This means that the result subscription will have an adaption object that will send the pose message to the given object, and send the result to the callback.
+							
+							What happen if we need to get the position of the pose, and not the pose. 
+							
+							Not big deal, we just need to: 
+							
+							\begin{code}
+				(self controller node buildConnectionFor: '/example/pose/stamped' ) 
+					typedAs: 'geometry_msgs/PoseStamped'; 
+					adaption: #pose \> #position;
+					for: [ : position |  Transcript show: position ];
+					connect .
+					
+							\end{code}
+							
+							the 
+							
+							\begin{code} 
+							
+							\> 
+							
+							\end{code} 
+							
+							operator is an operator that defines a chain of transformations. This means that, after send the message pose, it will send the message position, and use that as input of our callback. 
+							
+							
+							Like this, we can navigate any kind of object. The main cons is that we cannot receive any but the value of one field. (we cannot yet choose more than one field). What means that we will lose the rest of the data if we use this. 
+						
+						\subsection{Transforming data}
+						
+							Other of the common problems are the reifications. ROS Types are just for sending information, but they are not domain objects. They are generated on demand, i order to make light weight the image. This means that the object i will receive in my callback is always a dumb object that cannot do but set and get attributes.
+							
+							There are, however, some objects that are commonly transformed to domain objects, that can be usually mapped from one type to other. By example, \fwkName{} comes with a class named PhaROSPose. This class has implemented for it objects several methods for conversion an measures. In other words, when we are working with poses, in almost cases we will want to deal with this object and not with the generated one.
+							
+							For this can of cases, we can add to our chain of adaption a transformation of types
+							
+							Lets picture that we have a topic typed as Pose, we can connect it as 
+							
+							
+							\begin{code}
+				(self controller node buildConnectionFor: '/example/pose' ) 
+					typedAs: 'geometry_msgs/Pose'; 
+					adaption: PhaROSPose;
+					for: [ : pose |  Transcript show: pose ];
+					connect .
+					
+							\end{code}
+							
+							
+							The received pose, it will be of type PhaROSPose. 
+							
+							Again, if we need the position instead of the pose, we can write it in two ways
+							
+							\begin{code}
+				(self controller node buildConnectionFor: '/example/pose' ) 
+					typedAs: 'geometry_msgs/Pose'; 
+					adaption: PhaROSPose \> position;
+					for: [ : position |  Transcript show: pose ];
+					connect .
+					
+							\end{code}
+							
+							
+							
+							This will convert the pose to a PhaROSPose and then ask for the position. Or, for making less computations
+							
+							
+							
+							\begin{code}
+				(self controller node buildConnectionFor: '/example/pose' ) 
+					typedAs: 'geometry_msgs/Pose'; 
+					adaption: #position \> PhaROSPosition;
+					for: [ : position |  Transcript show: pose ];
+					connect .
+					
+							\end{code}
+							
+							This will first navigate to the position field, for converting it content to a PhaROSPosition type. Which is the type of the position component of a PhaROSPose.
+							
+							
+							How this bizarre mechanism works? Because is not really easy to map two types, it cannot be free, and, actually is not.
+							
+							This notation allow us to have the transformation of a type coded in just one place, and even hide the name of the conversion.
+							
+							For having this conversion available, the class that is wanted to be created should have a constructor named from{ClassNameOfTheROSType). 
+							
+							
+							If we browse the class side of PhaROSPose and PhaROSPosition we will find
+							
+							
+					\begin{code}
+PhaROSPose>>#fromGeometry_msgsPose: aPose
+	^ self position: (PhaROSPosition from: aPose position) orientation: (PhaROSQuaternion from: aPose orientation)
+
+PhaROSPosition>>#fromGeometry_msgsPosition: aPosition
+	^ PhaROSPosition from: aPosition
+	
+					\end{code}
+						
+							If you are asking why the PhaROSPosition constructor is so generic, it is because it construct it self from any object that understands the messages \#x \#y and \#z. 
+							
+							
+							This mechanism have also the same problem, there is information that we will lost and do not be able to recover.		
+						
+						
+					\section {Conditionals}
+					
+							Usually what happens is that we need some part of the information for conditions, or even that the acceptance condition of a packet of data is complex enough to want it out of the callback logic. 
+							
+							For this usage we have the message \#when: that can be sent to the connection builder.
+							
+							The usage is quite simple
+							
+							Picture that we want the pose object, but we don't want all the poses, just the poses that are as older 1 second. 
+							This is a quite common restriction, since we want data to be fresh as possible (even 1 second is chosen to make the example easier, but is maybe a lot of time)
+							
+							
+							
+							\begin{code}
+				(self controller node buildConnectionFor: '/example/pose' ) 
+					typedAs: 'geometry_msgs/Pose'; 
+					adaption: #position \> PhaROSPosition;
+					when:[ : message | DateAndTime now - (message header stamp) < = 1 second ];
+					for: [ : position |  Transcript show: pose ];
+					connect .
+					
+							\end{code}
+							
+							
+							
+							So, the callback will be executed only when the lifetime of the pose stamped is less than 1 second. If is more, it will be rejected.
+							Is important to see that the conditional block will receive the raw information, so, when you want to make some conditions related to information that you don't need in your callback, you just use a conditional block. Then the callback can remains easy and domain oriented. 
+							
+							
+					
+					\section {Time stamp}
+					
+						One of the problems of all this machinery is that we may still needing the timestamp for, maybe, synchronising data, or for other kind of calculations. 
+						For this cases, where the only thing we need from a data packet, but one concrete field, is the time stamp related with the header, or the packet it self, we can rely not the optional parameters of a callback
+						
+						And we can rely in this parameter always, when the first type has a header, the stamp will be the defined in it
+						
+						\begin{code}
+				(self controller node buildConnectionFor: '/example/pose' ) 
+					typedAs: 'geometry_msgs/PoseStamped'; 
+					adaption: #pose \> PhaROSPose;
+					when:[ : message | DateAndTime now - (message header stamp) < = 1 second ];
+					for: [ :position :channel :stamp |  Transcript show: stamp  ];
+					connect .
+					
+						\end{code}
+					
+					And when we have no header
+					
+						\begin{code}
+				(self controller node buildConnectionFor: '/example/pose' ) 
+					typedAs: 'geometry_msgs/Pose'; 
+					adaption: PhaROSPose;
+					for: [ :position :channel :stamp |  Transcript show: stamp  ];
+					connect .
+					
+						\end{code}
+
+					The stamp received will be the stamp of the reception of the packet
+					
+					The restriction of this mechanism are
+					
+					\begin{itemize}
+						\item The algorithm check for a header in the first type, it does not do it in inner types. So, if the header is in the an inner type it will not be minded
+						\item The stamp mechanism is only available in the callback scope, not in the conditional scope. Thats why our second example of usage has not when: message.
+					\end{itemize}
+					
+					
+					\section {Callbacks}
+					
+						There are times where we need to configure our connection in one part and set the callback in other place, in a place that you don't want to use a builder, but the real topic subscription.
+						 In this cases you just need define your connection as always but do not use the for: message during the configuration. 
+						
+						The builder will set a default callback that writes in the transcript this legend 'Warning! This topic conection it has no callback configured! ', in order to do not let you forget the fact that you have a thread running, receiving information that is not being used.
+						
+						Then, where you receive the connection, you can send to the topic the messages \#for: and \#callback: Both do the same, but express different semantics.
+						
+						
+						\begin{code}
+						connection := (self controller node buildConnectionFor: '/example/pose' ) 
+									typedAs: 'geometry_msgs/Pose'; 
+									adaption: PhaROSPose;
+									connect .
+				
+						connection for: [ :position :channel :stamp |  Transcript show: stamp  ].
+						\end{code}
+
+
+						If you don't mind to use a builder object, and have the connect message in the receiver context, we recommend to use the builder, so you are sure that there is always a useful callback setter. 
+						
+						
+						
+						\begin{code}
+						connectionBuilder := (self controller node buildConnectionFor: '/example/pose' ) 
+									typedAs: 'geometry_msgs/Pose'; 
+									adaption: PhaROSPose.
+													
+						connection := connectionBuilder for: [ :position :channel :stamp |  Transcript show: stamp  ];	connect.
+						\end{code}						
+						
+					\section{Tip about performance}
+					
+					
+						One implementation detail that is important is the fact that a topic is connected one time per node. Since we are always working with the same node inside the package definition, all the times that we connect to a topic, we are using always the same connection, but defining different objects for callback management. 
+						
+						This is an important trade off. We can have then several callbacks for a topic, each one with it own full configuration. This is flexble, and reduces the IO work. 
+						In exchange, the same thread that does the IO work, is working on the callbacks. So, the more callbacks you define, the more work have the thread in between input and other, making the available messages to read quite bigger, and losing efficiency in the reading, what have impact in the how-fresh is a data.
+						
+						So, take this in care when you are deciding to have more than one connection to the same topic from the same instance.
+						
+					
+					
+					
+					\section {Brief}
+					
+						\begin{itemize}
+							\item Adapting incoming data\begin{itemize}
+							
+								\item Add the message \#adaption: to the connection building chain of messages to shape the message that it will be received by your callback.
+								\item Use symbols to adapt sending messages
+								\item Use class names to make conversions (Reminding to implement the needed class methods)
+								\item Combine your adaptions with the \verb|\>| operator. 
+							\end{itemize}
+							\item Add the message \#when: to define a callback based on raw data to accept or reject a received packet
+							\item Let your callbacks rely on the third optional parameter to have the time stamp of the packet reception. 
+							\item Divide your connection building from the callback setting to be able to split the name and type of a topic from your behaviour code. 
+							\item Mind the thread architecture when you do strange stuff in your callbacks.
+						\end{itemize}
+				
+
+%\chapterauthor{\authorjankurs{} \\ \authorguillaume{} \\ \authorlukas{}}
+
+%=============================================================
+\ifx\wholebook\relax\else
+
+
+\end{document}
+
+\fi
+%=============================================================

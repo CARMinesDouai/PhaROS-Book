@@ -1,0 +1,161 @@
+
+%=================================================================
+\ifx%
+\wholebook%
+\relax%
+\else
+% --------------------------------------------
+% Lulu:
+	\documentclass[a4paper,10pt,twoside]{book}
+	\usepackage[
+		papersize={6.13in,9.21in},
+		hmargin={.75in,.75in},
+		vmargin={.75in,1in},
+		ignoreheadfoot
+	]{geometry}
+	\input{../common.tex}
+	\setboolean{lulu}{true}
+% --------------------------------------------
+% A4:
+%	\documentclass[a4paper,11pt,twoside]{book}
+%	\input{../common.tex}
+%	\usepackage{a4wide}
+% --------------------------------------------
+    \graphicspath{{figures/} {../figures/}}
+    \begin{document}
+\fi
+%=================================================================
+%\renewcommand{\nnbb}[2]{} % Disable editorial comments
+\sloppy
+%=================================================================
+\chapter{Building an image for using PhaROS from scratch}
+\chalabel{fromScratch}
+\label{appendix:pharos-from-scratch} 
+				
+						\section{Obtaining a new image}
+						
+						First we will need a new fresh image. For doing this we will rely on zero conf scripts provided in get.pharo.org
+						
+						Create a new directory for your installation, step into and execute a zero conf script. By example: 
+						
+						\begin{lstlisting}[language=bash,title={ Downloading an Pharo 2.0 image }]
+							pharos@PhaROS:~$ mkdir myPackage
+							pharos@PhaROS:~$ cd myPackage
+							pharos@PhaROS:~/myPackage$ wget -O- get.pharo.org/20 | bash
+						\end{lstlisting}
+						
+						
+						\begin{lstlisting}[language=bash,title={ Downloading an image - output }]
+							--2014-02-21 16:53:39--  http://get.pharo.org/20
+							Length: 2587 (2,5K) [text/html]
+							Saving to: �STDOUT�
+							100%[=====================================>] 2 587       --.-K/s   in 0,004s  
+							2014-02-21 16:53:39 (704 KB/s) - written to stdout [2587/2587]
+							Downloading the latest 20 Image:
+    								http://files.pharo.org/image/20/latest.zip
+							Pharo.image
+						\end{lstlisting}
+						
+						Remember that for downloading other versions of pharo you just need to change the last part of the url (20) for the version you want: 14, 20, 30. 
+						There is no support PhaROS to run at a Pharo 1.3.
+						
+						  
+						We will use the Pharo 2.0 image for our example. 
+						
+						
+						\begin{lstlisting}[language=bash,title={ Downloading an image - output }]
+							pharos@PhaROS:~/myPackage$ pharo-vm-x Pharo
+						\end{lstlisting}
+					
+					
+					
+							
+						\begin{figure}[!htbp]
+			  				\centering
+    								\includegraphics[width=1\textwidth]{pharos.png}
+								\caption{Pharo IDE}
+							\centering
+						\end{figure}
+			
+						
+						
+						\section{Downloading the PhaROS framework}
+					
+						We will copy then the following code into the workspace 
+						
+						 
+						\begin{code}
+							Gofer it url: 'http://car.mines-douai.fr/squeaksource/PhaROS'; 
+			     					     package: 'ConfigurationOfPhaROS'; 
+			     					     load.
+								     
+							"If you want to load just the basic stuff, run "
+							(Smalltalk at: #ConfigurationOfPhaROS) load: 'default'.
+							
+							"If you want to load the tests as well, run instead "
+							(Smalltalk at: #ConfigurationOfPhaROS) load: 'default+tests'.
+						\end{code}
+		
+
+						\begin{figure}[!htbp]
+			  				\centering
+    								\includegraphics[width=1\textwidth]{GoferCodePhaROS.png}
+								\caption{Gofer code}
+							\centering
+						\end{figure}
+			
+						
+						
+						
+						And execute to load the default package. 
+						
+						\begin{figure}[!htbp]
+			  				\centering
+    								\includegraphics[width=1\textwidth]{GoferCodeDoIT.png}
+								\caption{Gofer code}
+							\centering
+						\end{figure}
+						
+						\begin{figure}[!htbp]
+			  				\centering
+    								\includegraphics[width=1\textwidth]{GoferCodeLoading.png}
+								\caption{Gofer code}
+							\centering
+						\end{figure}
+						
+						
+						Once all the code is loaded we just need to create our own both pharo and pharos packages. 
+						
+						
+						\section{Making up our package}
+						For doing this we need to subclass the class called PhaROSPackage executing the following code
+						
+						
+						\begin{code}
+							PhaROSPackage subclass: #[[MyAmazingPhaROSPackage]]
+							instanceVariableNames: ''
+							classVariableNames: ''
+							poolDictionaries: ''
+							category: '[[MyCrazyProjectName]]'
+						\end{code}
+						
+						
+						Changing, of course, [[MyAmazingPhaROSPackage]] and [[MyCrazyProjectName]] by the names you want.
+						
+						
+						Save the image, You are done. Now you can start to write your scripts as seen before. 
+						
+						Remember however that automatic script and type generation is not available in this mode.
+
+
+%\chapterauthor{\authorjankurs{} \\ \authorguillaume{} \\ \authorlukas{}}
+
+
+%=============================================================
+\ifx\wholebook\relax\else
+
+
+\end{document}
+
+\fi
+%=============================================================

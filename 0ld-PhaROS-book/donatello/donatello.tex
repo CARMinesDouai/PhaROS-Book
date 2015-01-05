@@ -1,0 +1,87 @@
+%=================================================================
+\ifx%
+\wholebook%
+\relax%
+\else
+% --------------------------------------------
+% Lulu:
+	\documentclass[a4paper,10pt,twoside]{book}
+	\usepackage[
+		papersize={6.13in,9.21in},
+		hmargin={.75in,.75in},
+		vmargin={.75in,1in},
+		ignoreheadfoot
+	]{geometry}
+	\input{../common.tex}
+	\setboolean{lulu}{true}
+% --------------------------------------------
+% A4:
+%	\documentclass[a4paper,11pt,twoside]{book}
+%	\input{../common.tex}
+%	\usepackage{a4wide}
+% --------------------------------------------
+    \graphicspath{{figures/} {../figures/}}
+    \begin{document}
+\fi
+%=================================================================
+%\renewcommand{\nnbb}[2]{} % Disable editorial comments
+\sloppy
+%=================================================================
+\chapter{Donatello Design}
+\chalabel{donatello}
+\label{appendix:donatello}
+			
+\section{ AlgorithmSwitcher - Class diagram}
+As first approach we can analyse this UML graph
+
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=1\textwidth]{DonatelloClassUml.png}
+
+\caption{Donatello - Class Diagram}
+\centering
+\end{figure}
+
+Since we analysed the code method per method, the UML diagram should be easy to understand. 
+I used the dashed line arrow that goes from the package to the nodelet to make understand that is not a hard reference.
+\newpage
+
+\section{ AlgorithmSwitcher - Object diagram}
+And to understand deeper the relations, we have two object diagrams, that shows the relation of reference in between objects.
+
+
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=1\textwidth]{DonatelloObjectGraph.png}
+
+\caption{AlgorithmSwitcher - Object Diagram}
+\centering
+\end{figure}
+
+In this case the arrows are drawn in the sense of usage. By example, the Service exposer, once configured, it will call the code related to the service, which is in the package definition.
+
+
+\section{ SwitchRequest - Object diagram}
+
+This diagram is quite simple, because as you saw in the code, the only thing that happens is that the node ask the user to insert two parameters and then call a service with that data.
+
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=1\textwidth]{DonatelloSRObjectGraph.png}
+
+\caption{SwitchRequest - Object Diagram}
+\centering
+\end{figure}
+
+
+%\chapterauthor{\authorjankurs{} \\ \authorguillaume{} \\ \authorlukas{}}
+
+
+%=============================================================
+\ifx\wholebook\relax\else
+
+
+\end{document}
+
+\fi
+%=============================================================

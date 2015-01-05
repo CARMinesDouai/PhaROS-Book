@@ -1,0 +1,505 @@
+%=================================================================
+\ifx%
+\wholebook%
+\relax%
+\else
+% --------------------------------------------
+% Lulu:
+	\documentclass[a4paper,10pt,twoside]{book}
+	\usepackage[
+		papersize={6.13in,9.21in},
+		hmargin={.75in,.75in},
+		vmargin={.75in,1in},
+		ignoreheadfoot
+	]{geometry}
+	\input{../common.tex}
+	\setboolean{lulu}{true}
+% --------------------------------------------
+% A4:
+%	\documentclass[a4paper,11pt,twoside]{book}
+%	\input{../common.tex}
+%	\usepackage{a4wide}
+% --------------------------------------------
+    \graphicspath{{figures/} {../figures/}}
+    \begin{document}
+\fi
+%=================================================================
+%\renewcommand{\nnbb}[2]{} % Disable editorial comments
+\sloppy
+%=================================================================
+\chapter{Parameters}
+\chalabel{parameters}				
+				
+				Donatello example has other nodes but the ones we have used. It have also some algorithms that we will analyse in the future (Because of it complexity) 
+					
+				Our new example then is already there ready to be executed (If you need to check how to install Donatello example, please go to \autoref{donatello:installing})					
+					
+			\section {The Color node example}		
+					
+					We will do as in the previous example, a first instantiations of the basics of the example:
+				
+			\begin{lstlisting}[language=bash,title={Starting up ROS}]
+				pharos@PhaROS:~$ roscore
+			\end{lstlisting}
+			
+			With the same output as before:
+			
+			\begin{lstlisting}[language=bash,title={Starting up ROS - Output}]
+				
+				... logging to /home/pharos/.ros/log/a3e8bd7e-8ea0-11e3-bfbd-0800275a8d1d/roslaunch-PhaROS-12822.log
+				Checking log directory for disk usage. This may take awhile.
+				Press Ctrl-C to interrupt
+				Done checking log file disk usage. Usage is <1GB.
+
+				started roslaunch server http://localhost:39207/
+				ros_comm version 1.9.47
+
+
+				SUMMARY
+				========
+
+				PARAMETERS
+				 * /rosdistro
+				 * /rosversion
+
+				NODES
+
+				auto-starting new master
+				process[master]: started with pid [12836]
+				ROS_MASTER_URI=http://localhost:11311/
+
+				setting /run_id to a3e8bd7e-8ea0-11e3-bfbd-0800275a8d1d
+				process[rosout-1]: started with pid [12849]
+				started core service [/rosout]
+			\end{lstlisting}
+			
+			
+			
+			\begin{lstlisting}[language=bash,title={Starting up TurtleSIM}]
+				pharos@PhaROS:~$ rosrun turtlesim turtlesim_node
+			\end{lstlisting}
+			
+			
+				The TurtleSIM is a node that let us spawn turtles, as manageable agents that have both sensors and actuators on board. 
+				Each simulated turtle is related with an exclusive set of topics for managing movement and knowing information about the turtle (we will see better this when we analyse the code). 
+				
+				As output of the TurtleSIM startup we have the information of the turtle that is spawned by default.
+			
+			\begin{lstlisting}[language=bash,title={Starting up TurtleSIM - Output}]
+[ INFO] [1392390503.860630887]: Starting turtlesim with node name /turtlesim
+[ INFO] [1392390503.865011573]: Spawning turtle [turtle1] at x=[5.544445], y=[5.544445], theta=[0.000000]
+			\end{lstlisting}
+			
+				This run command, also will spawn immediately one screen like the following one. 
+			
+			\begin{figure}[!htbp]
+  		
+  				\centering
+    				\includegraphics[width=0.5\textwidth]{TurtleSIM.png}
+				
+				\centering
+				\title{TurtleSIM Screen}
+			\end{figure}
+			
+				This is the simulator. On this screen is where we will see the effect of each control algorithm.
+			
+				Having the TurtleSIM running, now we just need to have the controller node from Donatello package running. 
+				
+			
+			\begin{lstlisting}[language=bash,title={Starting up Donatello/AlgorithmSwitcher}]
+				pharos@PhaROS:~$ rosrun donatello headless algorithm_switcher
+			\end{lstlisting}
+			
+			\begin{lstlisting}[language=bash,title={Starting up Donatello/AlgorithmSwitcher - Output }]
+				Starting up default turtle(turtle1) handler... 
+				Starting up switch service... 
+				Done.
+			\end{lstlisting}
+
+			
+			\begin{lstlisting}[language=bash,title={Starting up Donatello/SwitchRequest}]
+				pharos@PhaROS:~$ rosrun donatello headless switch_request
+			\end{lstlisting}
+			
+			\begin{lstlisting}[language=bash,title={Starting up Donatello/SwitchRequest - Interactive Output }]
+				Please, write the name of turtle you want to switch the algorithm. (The default one is called turtle1) 
+				turtle1
+
+				Please, write the name of one of the following algorithms  #('random' 'quiet' 'pursuiter' 'circular' 'pharo')
+				random
+				
+				Done.
+			\end{lstlisting}
+			
+
+			Now our system is about a TurtleSIM that has related a turtle handle for the default turtle, and is moving it randomly inside it cage. 
+				
+			Now we will add then our new node to the system, which is named color. 
+			
+			
+			\begin{lstlisting}[language=bash,title={Starting up Donatello/Color}]
+				pharos@PhaROS:~$ rosrun donatello headless color
+			\end{lstlisting}
+			
+			
+			\begin{lstlisting}[language=bash,title={Starting up Donatello/Color - Output}]
+				 Running Donatello color node at ROS 1.9.50 (groovy)
+				Donatello color node is a node that change the background color of the running TurtleSIM node with the behaviour of a turlte
+				Which turtle you want to define the background color? - Remember default turtle's name is turtle1 
+
+				turtle1
+
+				Color node running at: 0.5 hz
+			\end{lstlisting}
+			
+				
+				In the output will be prompted as well for a turtle name, in this case is to 'define the background colour'. 
+				After giving this information we are informed that the node is running at 0.5 hz. 
+				
+				
+				If we go to the TurtleSIM screen we will see something like the following screenshots
+				
+			\begin{figure}[!htbp]
+  		
+  				\centering
+    				\includegraphics[width=0.5\textwidth]{TurtleSIMColor1.png}
+				
+				\centering
+				\title{TurtleSIM Screen - Color 1} 
+			\end{figure}
+				
+			\begin{figure}[!htbp]
+  		
+  				\centering
+    				\includegraphics[width=0.5\textwidth]{TurtleSIMColor2.png}
+				
+				\centering
+				\title{TurtleSIM Screen - Color 2}
+			\end{figure}
+				
+				
+	
+				
+			So, now the background colour of the TurtleSIM it seems to change according to the movement of the turtle (Is easy to realise that there is not change in the colour meanwhile the turtle is static) 
+			
+			Somehow, this new node is getting information from the given turtle and changing inner information in the TurtleSIM.
+			
+			As usual, we have no much more things to do than speculate or browse the code :). 
+			
+			
+			\section{Inspecting the Color node from Donatello package}
+			
+			 
+			 
+			 \begin{lstlisting}[language=bash,title={ Editing }]
+				pharos@PhaROS:~$ rosrun donatello edit
+			\end{lstlisting}
+			
+			Once in the Pharo IDE, as show \autoref{img:spotlight}, press control+enter for accessing spotlight. Type DonatelloPackage and enter. 
+			
+			As in the Chatter package, we will go before any other place to the script category. 
+			
+			\begin{figure}[!htbp]
+  				\centering
+    				\includegraphics[width=1\textwidth]{DonatelloPackage.png}
+				\centering
+				
+				\title{ Donatello package }
+			\end{figure}
+			
+			
+			Here then we go to the \#scriptColor method, to encounter the following code
+			
+			
+			\begin{code}
+scriptColor
+	| version distro red green blue  rate handle |
+	
+	self registerDefaultHandler.
+	
+	version := self node parameter:'/rosversion' initialized:''.
+	distro := self node parameter: '/rosdistro'	initialized:''.
+
+	self log: (' Running Donatello color node at ROS {1} ({2})' format: { version get . distro get }).
+	
+	red :=  self nodelets turtlesim bgcRed.
+	green :=  self nodelets turtlesim bgcGreen.
+	blue :=  self nodelets turtlesim bgcBlue.
+
+	rate :=  self rate.
+
+	self log: 'Donatello color node is a node that change the background color of the running TurtleSIM node with the behaviour of a turtle'.
+	handle := self getOrCreateHandleFor: (self askUserFor: 'Which turtle you want to define the background color? - Remember default turtle''s name is turtle1 ').
+	
+	self paralellize looping 
+					bindRed: red 
+					green: green 
+					blue: blue 
+					with: handle 
+					rate: rate.
+	
+	self log: ('Color node running at: {1} hz' format: { rate get }).
+	
+	rate onChange: [ :newRate :oldRate | 
+		self log: ('Changeing color rate update from{1} to {2}' format: { oldRate . newRate }).	
+	 ].
+			
+			\end{code}
+			 
+			 
+			 
+		Well, this method looks quite long, but, if we put out all the log and the things related just with logging, is not really long, but, in terms to follow the idea of the example (showing several ways to use parameters), let's analyse it with logs included.
+			 
+			
+		\begin{code}
+scriptColor
+	| version distro red green blue  rate handle |
+	
+	self registerDefaultHandler.
+	
+		\end{code}
+		
+		
+		The first two lines are already well known, the first is the variable declaration, the second one was analysed in the previous chapter. It register a handle in a dictionary for the turtle named 'turtle1', which is the default turtle name.
+		
+		
+		
+		\begin{code}
+	version := self node parameter:'/rosversion' initialized:''.
+	distro := self node parameter: '/rosdistro'	initialized:''.
+
+	self log: (' Running Donatello color node at ROS {1} ({2})' format: { version get . distro get }).
+
+		\end{code}
+		
+		This lines are new. The first two lines are quite similar. This lines are the needed code to ask for a parameter. 
+		\paragraph{What is a Parameter?} well, a parameter, or as i call them, public parameter, is a named value that can be accessed (for overriding it or reading it) for any one that knows it name, in any moment of the life of the system.
+		This way we can have dynamically configured nodes. 
+		
+		Lets analyse it as a generic snippet.
+		
+		
+		 \begin{code}
+	bindedObject := self node parameter:'/parameter/name' initialized: 'default value'.
+		\end{code}
+		
+		In order to get a binder object (an object that references to the value and that is always up-to-date with the system) that points a parameter, we ask to the related node for a parameter initialised with a value. 
+		
+		The initialisation value to define a value if the parameter is not yet defined. It also will define implicitly a type restriction (String in our example). Since we will use this values for specific mechanism and that the value comes from outside, we want to be sure that is suitable to do the work.
+		
+		
+		Then lastly we have the log line. If we check again the output of the node, the first log line is: ' Running Donatello color node at ROS 1.9.50 (groovy)'
+		
+		So, we know now that '/rosversion' and '/rosdistro' are common parameters that indicates this information.
+		And we know also that to a bind object, we can ask for 'get' in order to get its value.
+		
+		
+		Let's follow with the code. 
+		
+		\begin{code}
+	
+	red :=  self nodelets turtlesim bgcRed.
+	green :=  self nodelets turtlesim bgcGreen.
+	blue :=  self nodelets turtlesim bgcBlue.
+
+		\end{code}
+		
+		As we already saw in the previous chapter, turtlesim is the accessor for TurtleSim nodelet in Donatello package, then, we will browse the methods related in this class.
+			
+		Here we ask for bgcRed, bgcGreen and bgcBlue. BGC is a common acronym for Background colour. 
+	
+	
+		\begin{code}
+		
+	bgcRed
+	^ self controller node parameter:'/background_r' initialized: 0.
+	bgcGreen
+	^ self controller node parameter:'/background_g' initialized: 0.
+	bgcBlue
+	^ self controller node parameter:'/background_b' initialized: 0.
+	
+		\end{code}
+		
+		Taking in care the analysis of the snippet of parameters, we can quickly say that this methods return a bind to each of the colour of an RGB configuration.
+		
+		Sadly the names of this parameters are not directly attached to TurtleSIM. We encourage you a lot to put names like '/turtlesim/background-r', so is easy to know which is the node that is being feed with this information. 
+		
+		So, in the end of the execution of this lines, we have three binded parameters, one for each part of the RGB configuration of the background colour of the TurtleSIM.
+		
+		
+		
+		\begin{code}
+	rate :=  self rate.
+
+		\end{code}
+		
+		Then we ask for the rate. 
+		
+		\begin{code}
+	rate
+	^ self node parameter:'/color/rate' initialized: 0.5
+		\end{code}
+		
+		Which is other parameter. But in this case the variable (since it start with /color) it will be related with the behaviour of our node. 
+		The type of this parameter is float. So it always should be float. 
+		
+		
+		\begin{code}
+	self log: 'Donatello color node is a node that change the background color of the running TurtleSIM node with the behaviour of a turtle'.
+	handle := self getOrCreateHandleFor: (self askUserFor: 'Which turtle you want to define the background color? - Remember default turtle''s name is turtle1 ').
+	
+	self paralellize looping 
+					bindRed: red 
+					green: green 
+					blue: blue 
+					with: handle 
+					rate: rate.
+
+		\end{code}
+		
+		Then we just log some info about the node previously to prompt the user ( as already saw in our previous chapter ) for a turtle name, to configure an appropriate handle object.
+		
+		When we have already the colour handler, the turtle handle and rate, we spawn a thread that will execute, in an infinite loop. the message
+		
+		\#bindRed:green:blue:with:rate:.
+		
+		
+		\begin{code}
+
+bindRed: aRedColorBind green: aGreenColorBind  blue: aBlueColorBind with: aTurtleHandle  rate: aRate
+	aRate get hz wait. 
+	aRedColorBind set: ((aTurtleHandle pose position x * 100) % 255) asInteger.
+	aGreenColorBind set: ((aTurtleHandle pose position y* 100) % 255) asInteger.
+	aBlueColorBind set: 255 - ((aTurtleHandle pose orientation z* 100) % 255) asInteger.
+	self nodelets turtlesim clear.
+
+
+		\end{code}
+		
+		
+		This code is quite easy. We need to remember that \#get obtains the value of a binder object, and learn that \#set: sets it up.
+		
+		The expected value of rate, as we saw in the previous lines, is a float. This float will be used as hz rate to regulate the execution of the method. 
+		
+		The red, green and blue colours setting, is related with the turtle pose. And finally theres is an execution of something called \#clear. 
+		
+		
+		\begin{code}
+clear
+	^  (self controller node service: '/clear') call.
+		
+		
+		\end{code}
+		
+		In the specification of the turtle sim, it says that for changing the colour of the turtle you need not just to set the parameters, but also the call the clear service. 
+		
+		So we do it. (This is why the drawn path of the turtle it disappear suddenly, in a constant interval of time).
+		
+		We probable have noticed that the call to the service was without parameters. This is because /clear service do not receive anything as request, and give no real response. In this cases so can invoke \#call instead of \#call: 
+		
+		
+		
+		\begin{code}	
+	self log: ('Color node running at: {1} hz' format: { rate get }).
+		
+	rate onChange: [ :newRate :oldRate | 
+		self log: ('Changeing color rate update from {1}hz to {2}hz' format: { oldRate . newRate }).	
+	 ].
+		\end{code}
+		
+		
+		Finally, we have a final log, that shows the configured rate for our node, and an \#onChange:	 message send. 
+		
+		
+		\#onChange: method will register a callback that will be executed when there is a change in the parameter, exposing (both optional) the new and the old value of the parameter.
+			 
+		In this case then, if we set the parameter from outside, we should have a log in the node console, and of course, we should have a different rate of update of the background colour of the TurtleSIM.
+		
+		
+		For dealing with parameters, ROS give us a console command named 'rosparam'. This command let us list the parameters in general, and set/get a particular one.
+		
+		The following command will show us the current value of a parameter
+		
+		\begin{lstlisting}[language=bash,title={ rosparam - get }]
+			pharos@PhaROS:~$ rosparam get /color/rate 
+		\end{lstlisting} 
+		
+		In this case, as we already expected from the code analysis, the output is 
+			 			 
+		\begin{lstlisting}[language=bash,title={ rosparam - get - output}]
+			5.0 
+		\end{lstlisting} 
+
+		Then, for changing the value we just run
+		
+		\begin{lstlisting}[language=bash,title={ rosparam - set }]
+			pharos@PhaROS:~$ rosparam set /color/rate 10.0
+		\end{lstlisting} 
+			 			 
+		This parameter has not output, but it will have an impact in the color node console. 
+			 			
+			
+		\begin{lstlisting}[language=bash,title={ Donatello/Color - Output }]
+			Changing color rate update from 0.5hz to 10.0hz
+
+		\end{lstlisting} 
+			
+			
+		If we go to the TurtleSIM screen, we will see that the change of the background colour is more fluent, as we expected.
+			
+			
+		\section{What we learned}
+			
+			
+			
+			From image side. 
+			
+			
+			\begin{itemize}
+				\item parameter:= self node parameter: '/parameter/name' initialised: defaultValue 
+				\newline \-\- returns a binded parameter.
+				\item parameter set: aValidValue 
+				\newline \-\- change the value of a parameter
+				\item parameter get
+				\newline \-\- get the value of a parameter
+				\item parameter onChange: [ :new :old \textpipe "callback"]
+				\newline \-\- adds a callback that will be called when the value has changed.
+				\item parameters names should express the ownership.
+				\newline \-\- by example '/node-name/parameter'
+				\item service call
+				\newline \-\- calls a service with null request configuration
+			\end{itemize}
+			
+			
+			
+			From console side 
+		
+			\begin{itemize}
+				\item rosparam list
+				\newline \-\- lists the parameters of the whole system.
+				\item rosparam set /parameter/name value
+				\newline \-\- sets a parameter with the given value
+				\item rosparam get /parameter/name
+				\newline \-\- gets a parameter's value
+			\end{itemize}
+		
+		
+			In general 
+			
+			\begin{itemize}
+				\item Parameters allow us to have dynamic configurations
+				\item The get message will always give us the last registered value, what is helpful for basic values in algorithms.
+				\item The onChange: callback registration, give us a mechanism that is more powerful, since it runs orthogonally 
+			\end{itemize}
+
+
+%\chapterauthor{\authorjankurs{} \\ \authorguillaume{} \\ \authorlukas{}}
+
+%=============================================================
+\ifx\wholebook\relax\else
+
+
+\end{document}
+
+\fi
+%=============================================================

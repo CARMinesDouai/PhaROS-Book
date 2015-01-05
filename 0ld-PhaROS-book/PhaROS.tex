@@ -1,0 +1,131 @@
+%=================================================================
+% This is the main file for the PhaROS book.
+% The individual chapters can also be latexed by themselves.
+% Note that the \end{document} marker occurs near the
+% middle of this file, to leave out additional material
+% for a future version of the book.
+%=================================================================
+
+\RequirePackage{pdf14} % disables `\pdfobjcompresslevel` Warning
+
+\documentclass[a4paper,10pt,twoside]{book}
+\usepackage[
+	papersize={6.13in,9.21in},
+	hmargin={.75in,.75in},
+	vmargin={.75in,1in},
+	ignoreheadfoot
+]{geometry}
+\input{common.tex}
+\setboolean{lulu}{true}
+%=================================================================
+% Add the path for the figures of each chapter here:
+\graphicspath{
+	{figures/}
+}
+%=================================================================
+\let\wholebook=\relax
+\makeindex
+\makeglossary
+%=================================================================
+\renewcommand{\nnbb}[2]{} % Disable editorial comments
+%=================================================================
+\begin{document}
+\frontmatter
+%=================================================================
+\setcounter{page}{1}
+\pagestyle{headings}
+%=================================================================
+\author{
+	Noury Bouraqadi\quad
+	Santiago Bragagniolo\quad \\
+	Luc Fabresse\quad 
+	Jannik Laval
+	}
+\title{\Huge\bf PhaROS - Towards Live Environments in Robotics}
+%\isodate
+\date{\emph{Version of \today}}
+
+\begin{figure}[h!]
+  		
+  		\centering
+    		\includegraphics[width=1\textwidth]{Figures/pharos-portrait.png}
+		\maketitle
+		\centering
+\end{figure}
+
+%\date{}
+\maketitle
+
+\newpage
+\input{copyright/copyright.tex}
+%\input{Copyright/Copyright.tex}
+
+%=================================================================
+\tableofcontents
+\sloppy % To avoid LaTeX's annoying habit of letting lines stick over the margins!
+\mainmatter
+
+\chapter{Abstract}\chalabel{abstract}
+	
+	
+ROS Is a open software integration framework for robots that is growing up every day and that it shows several success in its topic which includes commercial applications of robots. 
+This time-slice will be oriented to overview how to program our own nodes for ROS In Pharo . Also we will show how much can we exploit our highly dynamic environment in this organic architecture. 
+\fwkName{} started early 2012 with at L'Ecole des mines de Douai for a robot for human assistance project (Robulab Project). We started this project trying to put emphasis in the dynamism of Pharo language from the beginning. We are now in a process of stabilising and closing the all the basic functionalities, having support for the last three versions of ROS. 
+This talk will provide knowledge about ROS environment, and how to quickly prototype the functionality you want to add on it without much knowledge.
+      
+
+
+\part{This meets that}
+
+\input{basics/basics.tex} 
+\input{makeEnvironment/makeEnvironment.tex} 
+\input{Install/Install.tex} 
+
+\part{Starting like our ancestors, by example}
+
+I strongly believe in directing teaching by example, and by usage. Then, before go to concepts, architecture and design we will just use what we have at hand. 
+
+\input{topics/topics.tex} 
+\input{services/services.tex} 
+\input{types/types.tex} 
+\input{parameters/parameters.tex} 
+\input{launchConf/launchConf.tex} 
+
+\part{When the boy becomes a man}
+
+At this point, we should have already the base to start to fly a bit without central examples, in order to go a bit faster in conceptual and technical meanings. 	
+				
+This whole part is about writing your own robotic solutions, from the first image, to the code distribution.
+					
+					
+\input{createOwnPack/createOwnPack.tex} 
+\input{advancedTopicsSubscription/advancedTopicsSubscription.tex} 
+\input{sma/sma.tex} 
+\input{distributingCode/distributingCode.tex} 
+
+\part{Appendix}
+\appendix
+
+\jack{We should \textbf{really} add an explanation by example of TF in this book. There are lot of things that we can drop, but TF is quite mystic. I will try to reach it by using the donatello example.}
+
+\input{donatello/donatello.tex} 
+\input{fromScratch/fromScratch.tex} 
+\input{installTool/installTool.tex} 
+\input{cheatSheet/cheatSheet.tex} 
+% \printglossary
+%\bibliographystyle{jurabib}
+%\bibliography{scg}
+
+\printindex
+
+
+\end{document}
+
+%=================================================================
+%%% Local Variables:
+%%% coding: utf-8
+%%% mode: latex
+%%% TeX-master: t
+%%% TeX-PDF-mode: t
+%%% ispell-local-dictionary: "english"
+%%% End:

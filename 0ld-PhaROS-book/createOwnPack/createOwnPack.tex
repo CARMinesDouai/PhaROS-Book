@@ -1,0 +1,449 @@
+%=================================================================
+\ifx%
+\wholebook%
+\relax%
+\else
+% --------------------------------------------
+% Lulu:
+	\documentclass[a4paper,10pt,twoside]{book}
+	\usepackage[
+		papersize={6.13in,9.21in},
+		hmargin={.75in,.75in},
+		vmargin={.75in,1in},
+		ignoreheadfoot
+	]{geometry}
+	\input{../common.tex}
+	\setboolean{lulu}{true}
+% --------------------------------------------
+% A4:
+%	\documentclass[a4paper,11pt,twoside]{book}
+%	\input{../common.tex}
+%	\usepackage{a4wide}
+% --------------------------------------------
+    \graphicspath{{figures/} {../figures/}}
+    \begin{document}
+\fi
+%=================================================================
+%\renewcommand{\nnbb}[2]{} % Disable editorial comments
+\sloppy
+%=================================================================
+\chapter{ Creating our own package }
+\chalabel{createOwnPack}
+				
+				
+				The minimum to have something running in a ROS installation is a package. In the lasts distributions, a catkin package.
+				Since is the minimum and is the unit we choose for automations, the first thing you need to learn is how to create one.
+				
+				There are actually two ways to create a package.
+				
+				\begin{itemize}
+					\item \installationTool{}
+					\item From scratch
+				\end{itemize}
+				
+
+				Since this is a text that aims to be agile, we will focus in the \installationTool{} way. The second one, From scratch, is widely treated in the  \autoref{appendix:pharos-from-scratch}.
+
+				\section{Getting started with \installationTool{} for creating new packages}
+				
+				
+				To create a catkin package in a ROS installations means have a package folder in a catkin workspace with the proper distribution of things. Means to have an image installed in this package that has the implementation of this package and is suited up with the \fwkName{}.
+				
+				In the end, it means to have something similar to the packages we had installed for the examples, something similar to the directory layout explained at \autoref{package:layout}
+
+				For achieving this noble goal, we have the \installationTool{}.
+				
+					
+				\begin{lstlisting}[language=bash,title={ Package creation }]
+					pharos@PhaROS:~$ pharos create --help
+				\end{lstlisting} 
+			 			
+				\begin{lstlisting}[language=bash,title={ Package creation help }]
+	usage: pharos create PACKAGE [OPTIONS]
+ 
+	Options:
+--help			Shows this text
+--location			Absolute path to a valid catkin workspace (not source folder. The workspace. By example /home/user/workspace ). Default value is the current directory.		
+--silent	{ true | false }. If silent is false you will be able to see the installation of the output image. Default value is true. 
+--version			{ 1.4 | 2.0 | 3.0 }. It indicates the version of pharo to download. It will not count if you are in a not silent session.  Default value is 2.0
+--ros-distro		Indicates the distribution of ROS that you want to use. By default is groovy { groovy | hydro | fuerte } 	
+--archetype		Indicates the name of the archetype to use for creating things. Default is basic-archetype.
+--author		Indicates the name of the author
+--maintainer		Indicates the name of the maintainer Default value is the indicated in author
+
+--author-email		Indicates the email  of the author
+--maintainer-email	Indicates the email of the maintainer. Default value is the indicated in author-email
+--description		Indicates the description of the package
+--pharo-user		Indicates the user name for the result image.
+--force-new		DELETE the package if it exists in the pointed location. 
+	
+				\end{lstlisting} 
+
+
+				Then, the easiest way to go is by stepping into the workspace folder and executing 
+
+				\begin{lstlisting}[language=bash,title={ Package creation }]
+					pharos@PhaROS:~$ pharos create my-package-name
+				\end{lstlisting}
+				
+				But before execute any command, lets make an analysis of the options we have.
+				
+				
+				\paragraph{location}
+					Location simply indicates the location of the workspace. If you have stepped on it before, this parameter is not needed. 
+					
+				\paragraph{silent}
+					The silent flag indicates if the installation should be silent. If it is false it will open the graphic interface of the image that is being installed. This means that you will be able to debug problems related with your configuration of. But, there are dragons there. The code that loads your code is orthogonal to \fwkName{}. In order to debug that you will need to get used to an other framework that is about deployment.
+				
+				\paragraph{version}
+					Version indicates the pharo version, it could be 1.4, 2.0, 3.0. We still supporting pharo 1.4 because there are some architectures that needs old vm, and for running on old vms you may need to run an older pharo. A good example of this is raspberry py. For the rest, the tool actually support just this versions.
+					
+				\paragraph{ros-distro}
+					The relation in between \fwkName{} and the current ROS installation is quite light, but is needed, because the commands to execute for some things are located in different places. The actual supported distributions are the listed in the help: {fuerte | groovy | hydro}
+					
+				\paragraph{archetype}
+					The archetype is the base definition of the dependancies. We will extend this definition widely in the code distribution chapter.
+					
+				\paragraph{author, author-email, maintainer,maintainer-email}
+					This information is needed by the catkin meta data file. Is quite important that you provide well formed email addresses, because if not, the tool will fail after doing all the work, taking much time for having acknowledge of the error. Just check twice this data.
+				
+				\paragraph{description}
+					Describe your project here. This is for human reading, so you can explain what ever you want. If you want to change information later you just need to execute the related package.xml file.
+				
+				\paragraph{pharo-user}
+					During the execution of the installation scripts and even after, when usage of the package begins, you always need a user set in your image. If you have not configured it, strange things can happen (like scripts to not work in headless mode). So, we encourage you to use this flag for setting it. It is also the name that will be signing the committed changes.
+				
+				\paragraph{force-new}
+					Some times you just mistake a configuration, or had an error. Or just want to start again. In this cases when you already have a package in your workspace with the same name, and you want to delete it, without needing to delete it your self, add this flag as true. Take in care that this command makes no backup, you will not able to recover what is deleted.
+				
+				
+				
+				
+				
+				\section{Making some package creations}
+				
+				I will expose here the most complex things to understand for configuring the creation, this is the not-silent mode of creation and the chosen archetype. We make also some permutations of values meanwhile we change this two, to have some expected feedback knowledge.
+				
+				
+				
+				\subsection{The default creation}
+				
+				The default creation is quite good. It is based on the basic-archetype. What means that it download the \fwkName{} basics, some examples. It generates also a basic package and it gives some cheats. Remember that since you can have several distribution in your machine, is your responsibility to define which distribution you want to use. The default installation uses Pharo 2.0 in a groovy installation. This is our most widely tested bundle.
+				
+				
+				
+				
+				
+				Lets test it. 
+				\begin{lstlisting}[language=bash,title={ Default package creation }]
+					pharos@PhaROS:~$ cd ~/ros/workspace
+					pharos@PhaROS:~$ pharos create basicPackage.
+				\end{lstlisting} 
+				
+				
+				
+				\begin{lstlisting}[language=bash,title={ Default package creation - output}]
+--2014-02-25 11:12:14--  http://get.pharo.org/vm
+Connecting to 10.1.1.3:8080... connected.
+Proxy request sent, awaiting response... 200 OK
+Length: 5285 (5.2K) [text/html]
+Saving to: `STDOUT'
+
+100%[========================================================================================================================================>] 5,285       --.-K/s   in 0.006s  
+
+2014-02-25 11:12:14 (876 KB/s) - written to stdout [5285/5285]
+
+Downloading the latest pharoVM:
+	http://files.pharo.org/vm/pharo/linux/stable.zip
+mkdir: cannot create directory `pharo-vm': File exists
+--2014-02-25 11:12:17--  http://get.pharo.org/20
+Connecting to 10.1.1.3:8080... connected.
+Proxy request sent, awaiting response... 200 OK
+Length: 2587 (2.5K) [text/html]
+Saving to: `STDOUT'
+
+100%[========================================================================================================================================>] 2,587       --.-K/s   in 0.001s  
+
+2014-02-25 11:12:17 (1.79 MB/s) - written to stdout [2587/2587]
+
+Downloading the latest 20 Image:
+    http://files.pharo.org/image/20/latest.zip
+Pharo.image
+Setting up variables, network and obtaining required code....
+Running pre process...  
+Installing package... 
+Running post process... 
+Base path: /home/pharos/ros/workspace
+Source space: /home/pharos/ros/workspace/src
+Build space: /home/pharos/ros/workspace/build
+Devel space: /home/pharos/ros/workspace/devel
+Install space: /home/pharos/ros/workspace/install
+WARNING: Package name "basicPackage" does not follow the naming conventions. It should start with a lower case letter and only contain lower case letters, digits and underscores.
+####
+#### Running command: "cmake /home/pharos/ros/workspace/src -DCATKIN_DEVEL_PREFIX=/home/pharos/ros/workspace/devel -DCMAKE_INSTALL_PREFIX=/home/pharos/ros/workspace/install" in "/home/pharos/ros/workspace/build"
+####
+-- Using CATKIN_DEVEL_PREFIX: /home/pharos/ros/workspace/devel
+-- Using CMAKE_PREFIX_PATH: /home/pharos/ros/workspace/devel;/opt/ros/groovy
+-- This workspace overlays: /home/pharos/ros/workspace/devel;/opt/ros/groovy
+-- Using Debian Python package layout
+-- Using CATKIN_ENABLE_TESTING: ON
+-- Call enable_testing()
+-- Using CATKIN_TEST_RESULTS_DIR: /home/pharos/ros/workspace/build/test_results
+-- Found gtest sources under '/usr/src/gtest': gtests will be built
+-- catkin 0.5.77
+Unloading installation code ... 
+-- BUILD_SHARED_LIBS is on
+WARNING: Package name "basicPackage" does not follow the naming conventions. It should start with a lower case letter and only contain lower case letters, digits and underscores.
+-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-- ~~  traversing 2 packages in topological order:
+-- ~~  - basicPackage
+-- ~~  - donatello
+-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-- +++ processing catkin package: 'basicPackage'
+-- ==> add_subdirectory(basicPackage)
+WARNING: Package name "basicPackage" does not follow the naming conventions. It should start with a lower case letter and only contain lower case letters, digits and underscores.
+-- +++ processing catkin package: 'donatello'
+-- ==> add_subdirectory(donatello)
+-- donatello: 0 messages, 1 services
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/pharos/ros/workspace/build
+####
+#### Running command: "make -j1 -l1" in "/home/pharos/ros/workspace/build"
+####
+[ 25%] Built target donatello_generate_messages_lisp
+[ 75%] Built target donatello_generate_messages_py
+[100%] Built target donatello_generate_messages_cpp
+[100%] Built target donatello_generate_messages
+
+				\end{lstlisting} 
+				
+				If we check in this installation, we can see that there is a warning because of the name of our package. ROS adopt snake case for writing names. So, in order to respect the standard our package should be named something like \verb|basic_package|. 
+							
+				But is just a warning. Take it in care in case of bizarre errors. 
+				
+				Lets browse our image and understand what the hell is waiting for us there
+				
+				\begin{lstlisting}[language=bash,title={ Default package editing }]
+					pharos@PhaROS:~$ rosrun basicPackage edit.
+				\end{lstlisting} 
+				
+				
+				
+				\begin{figure}[!htbp]
+			  		\centering
+				    		\includegraphics[width=1\textwidth]{BasicPackage1.png}
+						
+						\caption{Basic Package - Cheat Sheet}
+					\centering
+				\end{figure}
+				
+				
+				The first thing that receives us is a workspace titled as \fwkName{} - Cheat Sheet
+				
+				In this workspace you will find quick how to deal with your new package, and with packages in general. It exposes also some snippets that we have already analysed in the previous part.
+				
+				The idea of this workspace is to be something you can have at hand. There is a copy of this cheat sheet in the \autoref{cha:cheatSheet} of this text.
+				
+				
+				Then we have al so the following window opened, but in second plane
+				
+				\begin{figure}[!htbp]
+			  		\centering
+				    		\includegraphics[width=1\textwidth]{BasicPackage2.png}
+						
+						\caption{Basic Package - Generated package class}
+					\centering
+				\end{figure}
+				
+				
+				The creation cycle it generates a package with the given name and our \fwkName{} conventions (Which are more related with pharo than with ROS, since we use Pharo to work)
+				
+				
+				This class have several scripts that also shows how to deal with the basics 
+				
+				It shows you what an script is, it shows you also how to deal with topics , services and parameters in an easy example that is not fully functional.
+				It also show you how to inject a nodelet and for that reason it generates a nodelet
+				
+				\begin{figure}[!htbp]
+			  		\centering
+				    		\includegraphics[width=1\textwidth]{BasicPackage3.png}
+						
+						\caption{Basic Package - Generated nodelet class}
+					\centering
+				\end{figure}
+				
+				
+				Which is, like we see, empty.
+				
+				The rest of the examples will be almost the same, they will change just a bit about what is downloaded from with the framework, which distribution is setter and which pharo version is used.
+				
+				
+				
+				\subsection{Watching our installation}
+				
+				
+				There are cases when a creation should be supervised, by example, if the configuration chosen is not compatible with the pharo version.
+				For this cases, we have the flag named 'silent'. This flag let us ask for showing the graphic interface of the image that is being built.
+				
+				So this example will be focused mainly in this flag. 
+				we will use also the author, maintainer specification.
+				
+				So let's execute the following lines
+
+				\begin{lstlisting}[language=bash,title={ Unsilent package creation }]
+					pharos@PhaROS:~$ cd ~/ros/workspace
+					pharos@PhaROS:~$ pharos create basicPackage --author="MyUserName" --author-email="user@mail.com" --maintainer="OtherUserName" --silent=false
+				\end{lstlisting} 
+				
+
+				 Since the package named basicPackage already exists, we will have an output like this
+				 
+				 \begin{lstlisting}[language=bash,title={ Unsilent package creation -Error }]
+				 
+					  The package already exists in the source folder. Add --force-new for deleting the existant package
+
+				\end{lstlisting} 
+				
+				So lets add, as proposed, the --force-user
+				
+				\begin{lstlisting}[language=bash,title={ Unsilent package creation }]
+					pharos@PhaROS:~$ cd ~/ros/workspace
+					pharos@PhaROS:~$ pharos create basicPackage --author="MyUserName" --author-email="user@mail.com" --maintainer="OtherUserName" --silent=false --force-new
+				\end{lstlisting} 
+				
+				
+				It will show the same output as in the basic installation on the console, but this time we will see something like
+				
+				\begin{figure}[!htbp]
+			  		\centering
+				    		\includegraphics[width=1\textwidth]{PackageCreation.png}
+						
+						\caption{Basic Package - Unsilent installation}
+					\centering
+				\end{figure}
+				
+				After the installation is done, the pharo IDE will close by it self. 
+				
+				lately, if we step into the created package and we read the package.xml file
+				\begin{lstlisting}[language=bash,title={ roscd - cat}]
+					pharos@PhaROS:~$ roscd basicPackage
+					pharos@PhaROS:~$ cat package.xml
+				\end{lstlisting} 
+				
+				we will find something like 
+				
+				\begin{lstlisting}[language=xml,title={ package.xml }]
+				<?xml version="1.0"?>
+				<package>
+				  	<name>basicPackage</name>
+				  	<version>0.1.0</version>
+				  	<description>A PhaROS package</description>
+				  	<maintainer email="user@mail.com">MyUserName</maintainer>
+					  <license>MIT</license>
+					  <author email="user@mail.com">OtherUserName</author> 
+					  <buildtool_depend>catkin</buildtool_depend>
+				</package>
+				\end{lstlisting} 
+				
+	
+				Here we will find the usage of the user information. We can see here that the email is both times the same (Because we just specify one) meanwhile the user is different, because we specified it both times.
+				
+				
+				If we analyse the created package with the edit command, we will see that the installation is completely the same, even the generated code, because our new package has the same name.
+				
+				
+				
+				\subsection{Customising the dependencies}
+				
+				
+				There are by default three archetypes in the default repository. And each repository can define it owns archetype, as we will see in \autoref{code:distribution} 
+				
+				\begin{itemize}
+					\item basic-archetype
+					\item core-archetype
+					\item full-archetype
+				\end{itemize}
+				
+				
+				\paragraph{The basic-archetype} downloads as dependencies the \fwkName{} core, with the TF (transformation) nodelet, and the TurtlesimNodelet as example of usage of PhaROSTransformationNodelet. (We will explain this nodelet in the next part of the book) 
+				
+				\paragraph{The core-archetype} downloads as dependencies the \fwkName{} core, with nothing else but package support. This is the lighter configuration you can have with the \installationTool{}.
+				
+				\paragraph{The full-archetype} downloads as dependencies the \fwkName{} core, with all the nodelets available in the default repository. This way is not recommended in any but the real case that you need all the nodelets, or that you need to understand the effect of a refactor on the whole system
+
+				For our example we will choose the core-archetype. We also will use the pharo user specification and the description parameters.
+				
+				
+				\begin{lstlisting}[language=bash,title={ Unsilent package creation }]
+					pharos@PhaROS:~$ cd ~/ros/workspace
+					pharos@PhaROS:~$ pharos create basicPackage --archetype=core-archetype --pharo-user=AUserForPharo --description="This is an example for the PhaROS package creation chapter" --force-new
+				\end{lstlisting} 
+				nist
+				
+				
+				It will show the same output as in the basic installation. As much, we will find the installation faster. 
+				
+				The important details of this example is that you will find not other subclasses of nodelet but the one generated for the package, that if you evaluate in a workspace the following
+				
+				\begin{code}
+					Author fullName
+				\end{code}
+				
+				it will print 'AUserForPharo'
+				
+				
+				And finally, if we cat the package.xml file,
+				
+				
+				\begin{lstlisting}[language=bash,title={ roscd - cat }]
+					pharos@PhaROS:~$ roscd basicPackage
+					pharos@PhaROS:~$ cat package.xml
+				\end{lstlisting} 
+				
+				 we will read the following 
+				
+				\begin{lstlisting}[language=xml,title={ package.xml }]
+				<?xml version="1.0"?>
+				<package>
+ 					 <name>basicPackage</name>
+					 <version>0.1.0</version>
+					 <description>This</description>
+					  <maintainer email="author@mail.com">author name</maintainer>
+					  <license>MIT</license>
+					  <author email="author@mail.com">author name</author> 
+					  <buildtool_depend>catkin</buildtool_depend>
+					  <export>
+					  </export>
+				\end{lstlisting} 
+				
+				
+				
+				All the rest of the installation will remains the same.
+				
+				
+				
+				\section {Brief}
+
+
+					\begin{itemize}
+						\item pharos create package
+						\newline \-\-Creating a default package is easy as this one line code
+						\item pharos create package --silent=false
+						\newline \-\-Use --silent=false for checking the image installation time.
+						\item pharos create package --archetype=-- an archetype --
+						\newline \-\-Check for suitable archetypes to make easier the setup of your new package
+						\item Almost information is for set up the catkin package as needed. So you can give the information now, or setup the package.xml file later.
+					\end {itemize}
+					
+
+%\chapterauthor{\authorjankurs{} \\ \authorguillaume{} \\ \authorlukas{}}
+
+%=============================================================
+\ifx\wholebook\relax\else
+
+
+\end{document}
+
+\fi
+%=============================================================

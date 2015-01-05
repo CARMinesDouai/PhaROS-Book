@@ -1,0 +1,200 @@
+
+%=================================================================
+\ifx%
+\wholebook%
+\relax%
+\else
+% --------------------------------------------
+% Lulu:
+\documentclass[a4paper,10pt,twoside]{book}
+\usepackage[
+papersize={6.13in,9.21in},
+hmargin={.75in,.75in},
+vmargin={.75in,1in},
+ignoreheadfoot
+]{geometry}
+\input{../common.tex}
+\setboolean{lulu}{true}
+% --------------------------------------------
+% A4:
+%	\documentclass[a4paper,11pt,twoside]{book}
+%	\input{../common.tex}
+%	\usepackage{a4wide}
+% --------------------------------------------
+\graphicspath{{figures/} {../figures/}}
+\begin{document}
+\fi
+%=================================================================
+%\renewcommand{\nnbb}[2]{} % Disable editorial comments
+\sloppy
+%=================================================================
+\chapter{\installationTool{}}
+\chalabel{installTool}
+\label{appendix:pharos}
+
+\textbf{This doc is for ROS Indigo}
+
+\section{Install ROS}
+
+First, we should install a ROS. 
+We will do it in this environment:
+
+\begin{itemize}
+	\item Ubuntu 14.04 64 bits
+	\item ROS Indigo \url{http://wiki.ros.org/indigo/Installation/Ubuntu}
+
+\begin{lstlisting}[language=bash]
+sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu trusty main" > /etc/apt/sources.list.d/ros-latest.list'
+wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
+sudo apt-get update
+sudo apt-get install ros-indigo-desktop-full
+\end{lstlisting}
+	
+% or
+% \begin{lstlisting}[language=bash]	
+% curl http://car.mines-douai.fr/scripts/ROSIndigo | bash
+% \end{lstlisting}
+
+	
+	\item Initialize your environment:
+
+\begin{lstlisting}[language=bash]	
+	sudo rosdep init
+	rosdep update
+\end{lstlisting}
+	
+	\item Set up your environment variables:
+\begin{lstlisting}[language=bash]
+echo "source /opt/ros/indigo/setup.bash" >> ~/.bashrc
+source ~/.bashrc
+\end{lstlisting}		
+\end{itemize}
+
+\section{Install PhaROS}
+
+Here the steps to install PhaROS:
+
+\begin{lstlisting}[language=bash]	
+curl http://car.mines-douai.fr/scripts/PhaROS | bash
+\end{lstlisting}
+	
+\luc{here}
+
+\subsection{\texttt{catkin} workspace}
+\luc{I would like to do: pharos catkinworkspace --init [--remove-all]...}
+
+\url{http://wiki.ros.org/catkin/Tutorials/create_a_workspace}
+	
+\begin{lstlisting}[language=bash,title={\installationTool{} help output}]
+mkdir -p ~/catkin_ws/src
+cd ~/catkin_ws/src
+catkin_init_workspace
+
+# testing it
+cd ~/catkin_ws/
+catkin_make
+
+# ensure that newly compiled packages will be found by rosrun
+cat >> ~/.bashrc < END
+source ~/catkin_ws/devel/setup.sh
+END
+\end{lstlisting}
+
+
+\section{Installing \installationTool{}}
+
+\begin{lstlisting}[language=bash,title={Installing \installationTool{}}]
+pharos@PhaROS:~$ wget http://car.mines-douai.fr/wp-content/uploads/2014/01/pharos.deb .
+pharos@PhaROS:~$ sudo dpkg -i pharos.deb
+\end{lstlisting}
+
+
+\begin{lstlisting}[language=bash,title={\installationTool{} help output}]
+pharos usage
+pharos install					- Installs a package 
+pharos create 					- Creates a new package based on an archetype
+pharos create-repository		- Creates a smalltalk script for creating your own repository
+pharos register-repository		- Register a new package repositry
+pharos list-repositories		- List registered repostiries
+pharos update-tool	      		- Check if there is any update of the tool, and it update it.
+pharos ros-install				- Installs a ros
+\end{lstlisting}
+
+
+%\section{Installing a Package with  \installationTool{}}
+%\section{Creating a Package with  \installationTool{}}
+%\section{Listing available Packages with  \installationTool{}}
+
+
+%\section{Creating a Repository with  \installationTool{}}
+%\section{Registering a Repository with  \installationTool{}}
+%\section{Listing configured Repositories with  \installationTool{}}
+
+%\section{Updating \installationTool{}}
+
+
+\section{Installing ROS with \installationTool{}}
+
+
+\begin{lstlisting}[language=bash,title={\installationTool{} for ROS installation}]
+pharos@PhaROS:~$ pharos ros-install --help
+\end{lstlisting}
+
+\begin{lstlisting}[language=bash,title={\installationTool{} for ROS installation}]
+usage: pharos ros-install 
+It installs a ROS in the machine. (Valid just for ubuntu).
+
+Options: 
+
+--version			version of ROS. { fuerte | groovy | hydro }. Default: groovy.
+--type-installation	Type of ros installation { desktop | desktop-full | ros-base }. Default: desktop.
+--configure		Indicates if the installation should be configured (modifiy .bashrc file ).{true|false} Default: true.
+--create-workspace	Indicates if a workspace should be created. It will create a workspace at ~/ros/worskpace. { true|false }. Default: true.
+
+\end{lstlisting}
+
+
+The tool propose us several configurations, and an easy way to install by default (which is quite good by default)
+
+\paragraph{Version:} Specify the distribution of ROS we want to install (It should be compatible with our Ubuntu installation). By default it will try with Groovy.
+\paragraph{Type-installation:} Specify what do we want to load. Ros-base will load just the architecture things, desktop will download several graphic tools and some stacks, desktop-full even more tools and stacks. (Check in the wiki site of each distribution to know what will be downloaded if you need more information) By default it will download desktop. 
+
+\paragraph{Configure:}Is a boolean value. If you are beginner, just left it with the default. It will modify .bashrc file of the current user, in order to have ROS always available. 
+\paragraph{Create-Workspace:} Is a boolean value.  If you are beginner, just left it with the default. In order to develop we need to have a place to place our code. This place is called workspace. And if this value is true, the tool will make up a new one in the standard location.
+
+
+This command is safe for installing because it will tell you if the ROS that you want to install is compatible with your Ubuntu installation.
+
+Running in an ubuntu 13.04 (Raring) , lets try to install a Fuerte distribution.
+
+\begin{lstlisting}[language=bash,title={\installationTool{} Installing incompatible version}]
+pharos@PhaROS:~$ pharos ros-install --version=fuerte
+\end{lstlisting}
+
+\begin{lstlisting}[language=bash,title={\installationTool{} Installing incompatible version - Output}]
+fuerte version is not available for: raring
+\end{lstlisting}
+
+
+In order to have a rich example, i will install an hydro version in my raring ubuntu installation. 
+
+
+\begin{lstlisting}[language=bash,title={\installationTool{} Installing Hydro in Ubuntu: Raring}]
+pharos@PhaROS:~$ pharos ros-install --version=hydro
+\end{lstlisting}
+
+The output of this script is shown at section \autoref{install:hydro}
+
+
+
+
+%\chapterauthor{\authorjankurs{} \\ \authorguillaume{} \\ \authorlukas{}}
+
+%=============================================================
+\ifx\wholebook\relax\else
+
+
+\end{document}
+
+\fi
+%=============================================================
